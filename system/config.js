@@ -5,6 +5,8 @@ const config = require('../system/config');
 
 // === manually-defined configs ===================
 
+//fixing for issue003
+
 
 // outputs debugging information to console, keeps developer logged in even after backend modifications to code
 exports.developing = function () {
