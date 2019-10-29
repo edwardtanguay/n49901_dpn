@@ -8,7 +8,7 @@ const config = require('../system/config');
 
 // outputs debugging information to console, keeps developer logged in even after backend modifications to code
 exports.developing = function () {
-return false;//DYNAMIC_LINE:configDeveloping
+	return false;//DYNAMIC_LINE:configDeveloping
 }
 
 // enables site to be switched between "parked" (for copying) and "live" (for using) 
@@ -25,7 +25,7 @@ exports.developingAllowedBrowserSignature = function () {
 }
 
 exports.port = function () {
-	return '49901';
+	return '49911';
 }
 
 // enables alternative codes to be given for items
@@ -180,7 +180,7 @@ exports.dynamicFileCodeAreaWordMarker = function () {
 }
 
 exports.defaultUserIdCode = function () {
-return 'dev';//DYNAMIC_LINE:defaultUserIdCode
+	return 'dev';//DYNAMIC_LINE:defaultUserIdCode
 }
 
 exports.environment = function () {
