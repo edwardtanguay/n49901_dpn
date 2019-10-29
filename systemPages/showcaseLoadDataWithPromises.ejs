@@ -1,0 +1,87 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+<style>
+	.page_loading_spinner {
+		margin-top: 10px;
+	}
+
+	.note {
+		margin: 0 0 20px 0;
+	}
+</style>
+
+<div id="app" class="pageContent">
+
+	<h3>Showcase: Load Data with Linked Promises</h3>
+	<div class="note">
+		Also see: <a href="showcaseLoadDataWithMultiplePromises">Showcase: Load Data With Multiple Promises</a>
+	</div>
+
+
+	<div v-for="dataItem in dataItems">
+		<div>{{dataItem}}</div>
+	</div>
+
+	<div>Number loaded: {{numberLoaded}}</div>
+
+	<div v-show="pageStatus == 'busy'"><i class="fa fa-spinner fa-pulse page_loading_spinner" aria-hidden="true"></i>
+	</div>
+
+</div>
+
+<script>
+	const app = new Vue({
+		el: '#app',
+		data: {
+			pageStatus: 'ready',
+			dataItems: [],
+			infos: [],
+			numberLoaded: 0
+		},
+		methods: {
+			initialize: function () {
+
+				const promises = [];
+
+				this.infos = ['111', '222', '333', '444', '555'];
+
+				for (info of this.infos) {
+					promises.push(this.loadData(info));
+				}
+				Promise.all(promises);
+
+			},
+			loadData: function (idCode) {
+				// promise is not needed since axios returns a promise
+				//return new Promise((resolve, reject) => {
+				this.pageStatus = 'busy';
+				const that = this;
+				return axios({
+					method: 'post',
+					url: 'controllerShowcaseLoadDataWithPromises',
+					data: {
+						action: 'loadData',
+						idCode: idCode
+					}
+				}).then(function (responseObject) {
+					const response = qsys.getResponse(responseObject);
+					that.dataItems.push(response.data.message);
+					that.numberLoaded++;
+					if (that.numberLoaded >= that.infos.length) {
+						that.pageStatus = 'ready';
+					}
+					//resolve();
+				}).catch(function (error) {
+					that.pageStatus = 'failed';
+				});
+				//});
+			},
+		}
+	});
+	app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

@@ -1,0 +1,280 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,bootbox,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+<style>
+	.theKind {
+		color: brown;
+		font-weight: 500;
+	}
+
+	.niceDate {
+		color: #aaa;
+		font-variant: small-caps;
+		font-size: 13px;
+	}
+
+	.permalink {
+		text-decoration: none !important;
+	}
+
+	.permalink:hover {
+		text-decoration: underline !important;
+	}
+</style>
+
+<div id="app" style="display:none" class="displayItemsPage">
+	<div v-show="status=='failed'">
+		(loading failed)
+	</div>
+	<div id="area_loaded" v-show="status=='ready'">
+		<div v-if="!permalinkIsShowing()" class="headerAll">
+			<h5>@@pageTitle</h5>
+		</div>
+
+		<div class="itemTypeManagementArea">
+			<div class="infoBox">
+				<input class="form-control searchBox pull-left" v-model="pageState.searchText"
+					:disabled="pageStatus == 'busy' || !thereAreSomeRecords()" v-on:keyup="filterItems()"
+					placeholder="search" /> <i v-show="pageState.searchText" @click="clearSearchField()"
+					class="fa fa-times pull-left iconClearSearch"></i>
+				<div class="clear"></div>
+				<ul>
+					<li v-show="thereAreSomeRecords()"
+						v-if="filteredSearchDataitems.length == allSearchDataitems.length">
+						Showing <span class="allItemsShown">ALL
+							{{allSearchDataitems.length}}</span> items.</li>
+					<li v-show="!thereAreSomeRecords()">There are currently no items.</li>
+					<li v-if="filteredSearchDataitems.length != allSearchDataitems.length">Showing
+						{{filteredSearchDataitems.length}} of {{allSearchDataitems.length}} items.</li>
+
+					<li v-show="!thereAreSomeRecords()">
+						<span @click="manage_add()" class="addItem">Add SearchDataitem</span> or add multiple items in
+						<a href="batchImport">Batch Import</a>.
+					</li>
+				</ul>
+
+			</div>
+
+			<!-- item -->
+			<div class="mainSearchItem" v-for="dataitem in filteredSearchDataitems">
+				<div class="title"><span class="theKind">{{dataitem.kind}}:</span> <a class="permalink"
+						:href="dataitem.permalinkUrl">{{dataitem.title}}</a>
+					<span class="niceDate"> - {{dataitem.niceDate}}</span>
+				</div>
+			</div>
+
+		</div>
+		<div id="area_loading" v-show="status=='loading'">
+			<i class="fa fa-spinner fa-pulse page_loading_spinner" aria-hidden="true"></i>
+		</div>
+
+	</div>
+	<script>
+		const app = new Vue({
+			el: '#app',
+			data: {
+				status: 'ready',
+				error: {},
+				allSearchDataitems: [],
+				filteredSearchDataitems: [],
+				viewport: {
+					height: 0,
+					width: 0,
+					device: '',
+					previousDevice: ''
+				},
+				pageStatus: 'busy',
+				pageState: {
+					searchText: '',
+					id: ''
+				},
+				searchFieldList: 'id,category,title,body,extras,systemWhenCreated,systemWhoCreated',
+				permalinkItem: {},
+				userData: {
+					login: '',
+					accessGroups: ''
+				}
+			},
+			created() {
+				window.addEventListener("resize", this.recalculateViewportSizes);
+			},
+			destroyed() {
+				window.removeEventListener("resize", this.recalculateViewportSizes);
+			},
+			methods: {
+				getComputerPageState: function () {
+					return {
+						searchText: '',
+						id: ''
+					};
+				},
+				getSmartphonePageState: function () {
+					return {
+						searchText: '',
+						id: ''
+					};
+				},
+				setDefaultPageState: function () {
+					if (this.viewport.device == 'computer') {
+						this.pageState = this.getComputerPageState();
+					} else {
+						this.pageState = this.getSmartphonePageState();
+					}
+				},
+				initialize: function () {
+					$("#app").fadeIn(100);
+					this.determineViewPort();
+					this.setDefaultPageState();
+					this.overridePageStateWithUrlState();
+					this.loadData();
+
+					// force initial view
+					if (this.viewport.device == 'smartphone') {
+						this.setViewportToSmartphone();
+					} else {
+						this.setViewportToComputer();
+					}
+
+					this.pageStatus = 'ready';
+					this.refreshUrlFromPageState();
+				},
+				overridePageStateWithUrlState: function () {
+					const url_searchText = qsys.getParameterValueFromUrl('searchText');
+					if (!qstr.isEmpty(url_searchText)) {
+						this.pageState.searchText = url_searchText;
+					}
+					const url_id = qsys.getParameterValueFromUrl('id');
+					if (!qstr.isEmpty(url_id)) {
+						this.pageState.id = url_id;
+					}
+				},
+				loadData: function () {
+					this.status = 'loading';
+					const that = this;
+					axios({
+						method: 'post',
+						url: '@@controllerIdCode',
+						data: {
+							action: 'loadPageData'
+						}
+					}).then(function (responseObject) {
+						const response = qsys.getResponse(responseObject);
+						that.allSearchDataitems = response.data.searchDataitems;
+						that.userData = response.data.userData;
+
+						that.filterItems();
+						that.focusSearch();
+						that.switchStateToPermalinkIfNecessary();
+
+						that.status = 'ready';
+					}).catch(function (error) {
+						that.status = 'failed';
+						console.log(error);
+					});
+				},
+				focusSearch: function () {
+					setTimeout(function () {
+						$('.searchBox').focus();
+					}, 50);
+				},
+				filterItems: function () {
+					const sortedField = 'id';
+					this.filteredSearchDataitems = qarr.multisort(this.allSearchDataitems.filter(item => this.includeInSearchFilter(item)), ['whenCreated'], ['desc']);
+					//this.filteredSearchDataitems = this.allSearchDataitems.filter(item => this.includeInSearchFilter(item));
+					this.refreshUrlFromPageState();
+				},
+				includeInSearchFilter: function (item) {
+					const parts = qstr.breakIntoParts(this.pageState.searchText, ' ');
+					for (part of parts) {
+						let foundInPart = false;
+						const searchBlock = this.getSearchBlockText(item);
+						if (searchBlock.toUpperCase().includes(part.toUpperCase())) {
+							foundInPart = true;
+						}
+						if (!foundInPart) {
+							return false;
+						}
+					}
+					return true;
+				},
+				getSearchBlockText(item) {
+					let r = '';
+					const searchFields = qstr.breakIntoParts(this.searchFieldList, ',');
+					for (const searchField of searchFields) {
+						r += item[searchField] + '§';
+					}
+					return r;
+				},
+				determineViewPort() {
+					this.viewport.width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+					this.viewport.height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+					this.viewport.device = this.viewport.width > 768 ? 'computer' : 'smartphone';
+				},
+				recalculateViewportSizes(e) {
+					this.determineViewPort();
+					if (this.viewport.previousDevice == 'computer' && this.viewport.device == 'smartphone') {
+						this.setViewportToSmartphone();
+					}
+					if (this.viewport.previousDevice == 'smartphone' && this.viewport.device == 'computer') {
+						this.setViewportToComputer();
+					}
+					this.viewport.previousDevice = this.viewport.device;
+				},
+				setViewportToSmartphone() {
+					this.refreshUrlFromPageState();
+				},
+				setViewportToComputer() {
+					this.refreshUrlFromPageState();
+				},
+				notBusy() {
+					return this.pageStatus != 'busy';
+				},
+				thereAreSomeRecords: function () {
+					return this.allSearchDataitems.length > 0;
+				},
+				refreshUrlFromPageState: function () {
+					qsys.changeUrl('@@refreshUrlFromPageState', this.pageState);
+				},
+				toggleBodyStatus: function (item) {
+					item.bodyStatus = item.bodyStatus == 'show' ? 'hide' : 'show';
+					this.$forceUpdate();
+					this.refreshUrlFromPageState();
+				},
+				showTheBody: function (item) {
+					return this.filteredSearchDataitems.length == 1 || item.bodyStatus == 'show';
+				},
+				clearSearchField: function () {
+					this.pageState.searchText = '';
+					this.filterItems();
+					this.focusSearch();
+				},
+				getItemBasedOnId: function (id) {
+					return this.allSearchDataitems.find(item => item.id == id);
+				},
+				switchStateToPermalinkIfNecessary: function () {
+					if (this.pageState.id) {
+						this.permalinkItem = this.getItemBasedOnId(this.pageState.id);
+						this.filteredSearchDataitems = this.allSearchDataitems.filter(item => item.id == this.pageState.id);
+					}
+				},
+				permalinkIsShowing: function () {
+					return this.pageState.id;
+				},
+				switchToViewAll: function () {
+					this.pageState.id = '';
+					this.refreshUrlFromPageState();
+					this.filterItems();
+					this.focusSearch();
+					this.openUpItemsBasedOnPageState();
+				},
+				userIsDeveloper: function () {
+					return qstr.atLeastOneTermMatchesInLists(this.userData.accessGroups, 'developers');
+				}
+			}
+		});
+		app.initialize();
+	</script>
+
+	<%- include(data.system_layout_footer)  %>

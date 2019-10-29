@@ -1,0 +1,381 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,bootbox,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+
+
+<div id="app" style="display:none" class="displayItemsPage">
+    <!--TODO: this new title section-->
+    <div v-if="permalinkIsShowing()" class="headerPermalink">
+        <h5><span @click="switchToViewAll()" class="showAllUsers">Showcase Users</span> >
+            {{permalinkItem.firstName}}
+            {{permalinkItem.lastName}} </h5>
+    </div>
+    <div v-if="!permalinkIsShowing()" class="headerAll">
+        <h5>Showcase Users</h5>
+    </div>
+
+    <div class="nonPermalinkArea">
+        <!--TODO-->
+
+        <div id="area_loaded" v-show="status=='ready'">
+            <div class="itemTypeManagementArea">
+                <div class="infoBox" v-if="!pageState.id">
+                    <input class="form-control searchBox pull-left" v-model="pageState.searchText"
+                        :disabled="pageStatus == 'busy' || !thereAreSomeRecords()" v-on:keyup="filterItems()"
+                        placeholder="search" /> <i v-show="pageState.searchText" @click="clearSearchField()"
+                        class="fa fa-times pull-left iconClearSearch"></i>
+                    <div class="clear"></div>
+                    <ul>
+                        <li v-show="thereAreSomeRecords()"
+                            v-if="filteredShowcaseUsers.length == allShowcaseUsers.length">
+                            Showing <span class="allItemsShown">ALL
+                                {{allShowcaseUsers.length}}</span> showcase users.</li>
+                        <li v-show="!thereAreSomeRecords()">There are currently no showcase users.</li>
+                        <li v-if="filteredShowcaseUsers.length != allShowcaseUsers.length">Showing
+                            {{filteredShowcaseUsers.length}} of {{allShowcaseUsers.length}} showcase users.</li>
+
+                        <li v-show="!thereAreSomeRecords()">
+                            <span @click="manage_add()" class="addItem">Add Showcase User</span> or add multiple items
+                            in <a href="batchImport">Batch Import</a>.
+                        </li>
+                    </ul>
+
+                </div>
+
+                <div class="item" :class="{highlighted: permalinkIsShowing()}" v-for="item in filteredShowcaseUsers">
+                    <div class="header prohibitSelectionClickable" @click="toggleBodyStatus(item)">
+                        <div class=pull-left>
+                            <div class="category">{{showCategory(item)}}</div>
+                            <div class="title">{{item.firstName}} {{item.lastName}}</div>
+                        </div>
+                        <!--TODO: whole block here-->
+                        <div v-show="showTheBody(item)" class="manageIconArea pull-right">
+                            <i v-if="!permalinkIsShowing()"
+                                class="fa fa-link fa-rotate-90 manageIcon manageIconPermalink" title="permalink"
+                                v-on:click.stop @click="manage_permalink(item)"></i>
+                            <i class="fa fa-pencil manageIcon" title="edit" v-on:click.stop
+                                @click="manage_edit(item)"></i>
+                            <i class="fa fa-plus manageIcon" title="add" v-on:click.stop @click="manage_add(item)"></i>
+                            <i class="fa fa-plus-square manageIcon" title="copy" v-on:click.stop
+                                @click="manage_copy(item)"></i>
+                            <i class="fa fa-trash-o manageIcon" title="delete" v-on:click.stop
+                                @click="manage_delete(item)"></i>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="body" v-show="showTheBody(item)" v-html="item.htmlBody">
+                    </div>
+                </div>
+
+            </div>
+            <div id="area_loading" v-show="status=='loading'">
+                <i class="fa fa-spinner fa-pulse page_loading_spinner" aria-hidden="true"></i>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const app = new Vue({
+            el: '#app',
+            data: {
+                status: 'ready',
+                allShowcaseUsers: [],
+                filteredShowcaseUsers: [],
+                viewport: {
+                    height: 0,
+                    width: 0,
+                    device: '',
+                    previousDevice: ''
+                },
+                pageStatus: 'busy',
+                pageState: {
+                    searchText: '',
+                    openItemIds: [],
+                    id: ''
+                },
+                searchFieldList: 'login, firstName, lastName, status, accessGroups, description, extendedDescription, notes',
+                permalinkItem: {}
+            },
+            created() {
+                window.addEventListener("resize", this.recalculateViewportSizes);
+            },
+            destroyed() {
+                window.removeEventListener("resize", this.recalculateViewportSizes);
+            },
+            methods: {
+                getComputerPageState: function () {
+                    return {
+                        searchText: '',
+                        openItemIds: '',
+                        id: '' //TODO
+                    };
+                },
+                getSmartphonePageState: function () {
+                    return {
+                        searchText: '',
+                        openItemIds: '',
+                        id: '' //TODO
+                    };
+                },
+                setDefaultPageState: function () {
+                    if (this.viewport.device == 'computer') {
+                        this.pageState = this.getComputerPageState();
+                    } else {
+                        this.pageState = this.getSmartphonePageState();
+                    }
+                },
+                initialize: function () {
+                    $("#app").fadeIn(100);
+                    this.determineViewPort();
+                    this.setDefaultPageState();
+                    this.overridePageStateWithUrlState();
+                    this.loadData();
+
+                    // force initial view
+                    if (this.viewport.device == 'smartphone') {
+                        this.setViewportToSmartphone();
+                    } else {
+                        this.setViewportToComputer();
+                    }
+
+                    this.pageStatus = 'ready';
+                    this.refreshUrlFromPageState();
+                },
+                overridePageStateWithUrlState: function () {
+                    const url_searchText = qsys.getParameterValueFromUrl('searchText');
+                    if (!qstr.isEmpty(url_searchText)) {
+                        this.pageState.searchText = url_searchText;
+                    }
+                    const url_openItemIds = qsys.getParameterValueFromUrl('openItemIds');
+                    if (!qstr.isEmpty(url_openItemIds)) {
+                        this.pageState.openItemIds = url_openItemIds;
+                    }
+                    const url_id = qsys.getParameterValueFromUrl('id');
+                    if (!qstr.isEmpty(url_id)) {
+                        this.pageState.id = url_id;
+                    }
+                },
+                loadData: function () {
+                    this.status = 'loading';
+                    const that = this;
+                    axios({
+                        method: 'post',
+                        url: 'controllerShowcaseSearchAndDisplayItemType',
+                        data: {
+                            action: 'loadPageData'
+                        }
+                    }).then(function (responseObject) {
+                        const response = qsys.getResponse(responseObject);
+                        that.allShowcaseUsers = response.data.showcaseUsers;
+
+                        for (const showcaseUser of that.allShowcaseUsers) {
+                            showcaseUser.bodyStatus = 'hide';
+                        }
+                        that.filterItems();
+                        that.focusSearch();
+                        that.openUpItemsBasedOnPageState();
+                        that.switchStateToPermalinkIfNecessary();
+
+                        that.status = 'ready';
+                    }).catch(function (error) {
+                        that.status = 'failed';
+                    });
+                },
+                openUpItemsBasedOnPageState: function () {
+                    const openItemIds = qstr.getIntegerArrayFromList(this.pageState.openItemIds);
+                    for (const showcaseUser of this.filteredShowcaseUsers) {
+                        if (openItemIds.includes(showcaseUser.id)) {
+                            showcaseUser.bodyStatus = 'show';
+                        }
+                    }
+                },
+                focusSearch: function () {
+                    setTimeout(function () {
+                        $('.searchBox').focus();
+                    }, 50);
+                },
+                filterItems: function () {
+                    const sortedField = 'id';
+                    this.filteredShowcaseUsers = qarr.multisort(this.allShowcaseUsers.filter(item => this.includeInSearchFilter(
+                        item)), ['id'], ['desc']);
+                    this.refreshUrlFromPageState();
+                },
+                includeInSearchFilter: function (item) {
+                    const parts = qstr.breakIntoParts(this.pageState.searchText, ' ');
+                    for (part of parts) {
+                        let foundInPart = false;
+                        const searchBlock = this.getSearchBlockText(item);
+                        if (searchBlock.toUpperCase().includes(part.toUpperCase())) {
+                            foundInPart = true;
+                        }
+                        if (!foundInPart) {
+                            return false;
+                        }
+                    }
+                    return true;
+                },
+                getSearchBlockText(item) {
+                    let r = '';
+                    const searchFields = qstr.breakIntoParts(this.searchFieldList, ',');
+                    for (const searchField of searchFields) {
+                        r += item[searchField] + '§';
+                    }
+                    return r;
+                },
+                determineViewPort() {
+                    this.viewport.width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+                    this.viewport.height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+                    this.viewport.device = this.viewport.width > 768 ? 'computer' : 'smartphone';
+                },
+                recalculateViewportSizes(e) {
+                    this.determineViewPort();
+                    if (this.viewport.previousDevice == 'computer' && this.viewport.device == 'smartphone') {
+                        this.setViewportToSmartphone();
+                    }
+                    if (this.viewport.previousDevice == 'smartphone' && this.viewport.device == 'computer') {
+                        this.setViewportToComputer();
+                    }
+                    this.viewport.previousDevice = this.viewport.device;
+                },
+                setViewportToSmartphone() {
+                    this.refreshUrlFromPageState();
+                },
+                setViewportToComputer() {
+                    this.refreshUrlFromPageState();
+                },
+                notBusy() {
+                    return this.pageStatus != 'busy';
+                },
+                buildManageItemUrl(command, id) {
+                    const returnUrl = qsys.getPageAndParametersFromUrl('showcaseSearchAndDisplayItemType');
+                    const encodedReturnUrl = qsys.encodeForUrlPassing(returnUrl);
+                    const targetUrl =
+                        `manageShowcaseUser?returnUrl=${encodedReturnUrl}&command=${command}&id=${id}`;
+                    return targetUrl;
+                },
+                manage_permalink(item) { //TODO
+                    const permalinkUrl = `showcaseSearchAndDisplayItemType?id=${item.id}`;
+                    qsys.gotoPage(permalinkUrl);
+                },
+                manage_edit(item) {
+                    if (this.notBusy()) {
+                        const targetUrl = this.buildManageItemUrl('edit', item.id);
+                        qsys.gotoPage(targetUrl);
+                    }
+                },
+                manage_add(item = null) {
+                    if (this.notBusy()) {
+                        let id = 0;
+                        if (item != null) {
+                            id = item.id;
+                        }
+                        const targetUrl = this.buildManageItemUrl('add', id);
+                        qsys.gotoPage(targetUrl);
+                    }
+                },
+                manage_copy(item) {
+                    if (this.notBusy()) {
+                        const targetUrl = this.buildManageItemUrl('copy', item.id);
+                        qsys.gotoPage(targetUrl);
+                    }
+                },
+                manage_delete(item) {
+                    if (this.notBusy()) {
+                        const that = this;
+                        bootbox.confirm({
+                            size: "small",
+                            message: `Are you sure you want to delete <b>${item.firstName} ${item.lastName}</b>?`,
+                            callback: function (confirmed) {
+                                if (confirmed) {
+                                    that.pageStatus = 'busy';
+                                    axios({
+                                        method: 'post',
+                                        url: 'controllerShowcaseSearchAndDisplayItemType',
+                                        data: {
+                                            action: 'deleteItem',
+                                            item: item
+                                        }
+                                    }).then(function (responseObject) {
+                                        const response = qsys.getResponse(responseObject);
+                                        that.allShowcaseUsers = that.allShowcaseUsers.filter(
+                                            function (innerItem) {
+                                                return innerItem.id != item.id
+                                            });
+                                        that.filterItems();
+                                        that.focusSearch();
+                                        that.pageStatus = 'ready';
+                                    }).catch(function (error) {
+                                        console.log(error)
+                                    });
+                                }
+                            }
+                        });
+                    }
+                },
+                thereAreSomeRecords: function () {
+                    return this.allShowcaseUsers.length > 0;
+                },
+                refreshUrlFromPageState: function () {
+                    qsys.changeUrl('showcaseSearchAndDisplayItemType', this.pageState);
+                },
+                toggleBodyStatus: function (item) {
+                    item.bodyStatus = item.bodyStatus == 'show' ? 'hide' : 'show';
+                    this.$forceUpdate();
+                    this.updateOpenItemIds(item);
+                    this.refreshUrlFromPageState();
+                },
+                updateOpenItemIds: function (item) {
+                    let openItemIds = qstr.getIntegerArrayFromList(this.pageState.openItemIds);
+                    if (item.bodyStatus == 'show') {
+                        openItemIds.push(item.id);
+                    } else {
+                        openItemIds = openItemIds.filter(function (id) { return id !== item.id });
+                    }
+                    this.pageState.openItemIds = openItemIds.join(',');
+                },
+                showTheBody: function (item) {
+                    return this.filteredShowcaseUsers.length == 1 || item.bodyStatus == 'show';
+                },
+                showCategory: function (item) {
+                    return 'Showcase User';
+                    //return item.accessGroups;
+                    //return item.firstName;
+                },
+                forceItemToUpdateInVueJs: function (item) {
+                    const holdLastName = item.lastName;
+                    item.lastName = 'nnn';
+                    item.lastName = holdLastName;
+                },
+                clearSearchField: function () {
+                    this.pageState.searchText = '';
+                    this.filterItems();
+                    that.focusSearch();
+                },
+                getItemBasedOnId: function (id) { //TODO
+                    return this.allShowcaseUsers.find(item => item.id == id);
+                },
+                switchStateToPermalinkIfNecessary: function () {
+                    if (this.pageState.id) {
+                        this.permalinkItem = this.getItemBasedOnId(this.pageState.id);
+                        this.filteredShowcaseUsers = this.allShowcaseUsers.filter(item => item.id == this.pageState.id);
+                    }
+                },
+                permalinkIsShowing: function () {
+                    return this.pageState.id;
+                },
+                switchToViewAll: function () {
+                    this.pageState.id = '';
+                    this.refreshUrlFromPageState();
+                    this.filterItems();
+                    this.focusSearch();
+                    this.openUpItemsBasedOnPageState();
+                }
+            }
+        });
+        app.initialize();
+    </script>
+
+    <%- include(data.system_layout_footer)  %>

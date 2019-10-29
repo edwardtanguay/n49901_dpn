@@ -1,0 +1,91 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome
+%>
+<%- include(data.system_layout_header)  %>
+
+<style>
+    .tiny {
+        font-size: 9px;
+    }
+    .customTable {
+        width: auto;
+    }
+    td.rightAligned {
+        text-align: right;
+    }
+</style>
+
+<div id="app">
+
+    <h3>Showcase: Read XML File</h3>
+
+    <div id="area_loaded" v-show="status=='ready'">
+
+        <table class="table customTable">
+            <thead class="thead-light">
+                <tr>
+                    <th>Time</th>
+                    <th>Temperature</th>
+                    <th>Precipitation</th>
+                    <th>Wind</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="item in forecasts">
+                    <td>{{item.time}}</td>
+                    <td class="rightAligned">{{item.temperature}}</td>
+                    <td class="rightAligned">{{item.precipitation}}</td>
+                    <td>{{item.wind}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <ul>
+        <li class="tiny"><a :href="creditUrl">{{creditText}}</a></li>
+        <li class="tiny"><a href="https://www.yr.no/place/Germany/Berlin/Berlin/forecast.xml">get uptodate XML data here</a></li>
+        </ul>
+
+    </div>
+    <div id="area_loading" v-show="status=='loading'">
+        <i class="fa fa-spinner fa-pulse page_loading_spinner" aria-hidden="true"></i>
+    </div>
+
+</div>
+
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            status: 'ready',
+            searchText: '',
+            forecasts: [],
+            city: '',
+            creditText: '',
+            creditUrl: ''
+        },
+        methods: {
+            loadData: function () {
+                this.status = 'loading';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'controllerShowcaseReadXmlFile',
+                    data: {
+                        action: 'loadPageData'
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    that.forecasts = response.data.forecasts;
+                    that.city = response.data.city;
+                    that.creditText = response.data.creditText;
+                    that.creditUrl = response.data.creditUrl;
+                    that.status = 'ready';
+                }).catch(function (error) {
+                    that.status = 'failed';
+                });
+            }
+        }
+    });
+    app.loadData();
+</script>
+
+<%- include(data.system_layout_footer)  %>

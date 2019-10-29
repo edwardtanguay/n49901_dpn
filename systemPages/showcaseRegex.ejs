@@ -1,0 +1,217 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+
+<style>
+	.developerArea {
+		border: 1px solid #ddd;
+		background-color: #eee;
+		padding: 20px;
+		border-radius: 5px;
+		margin: 40px 0 0 0;
+	}
+
+
+	.developerArea .processingOption:not(:last-child) {
+		margin: 0 0 20px 0;
+	}
+
+	.developerArea .header {
+		position: relative;
+		top: -34px;
+		left: -10px;
+		z-index: 1;
+		margin: -14px 0;
+		font-size: 17px;
+		color: brown;
+	}
+
+	.theRegexAreaShow {
+		font-family: 'Courier New', Courier, monospace;
+		font-size: 12px;
+		color: brown;
+		background-color: #f7f7f7;
+		padding: 5px 8px;
+	}
+
+	.theRegexArea {
+		cursor: pointer;
+		display: inline-block;
+		margin: 5px 0 0 0;
+	}
+
+	.theRegexAreaTrigger {
+		background-color: #ddd;
+	}
+
+	.text {
+		border-bottom: 1px solid #ccc;
+		padding-bottom: 3px;
+		margin-bottom: 3px;
+	}
+
+	.parsedText {
+		border-top: 1px solid #ccc;
+		padding-top: 3px;
+		margin-top: 8px;
+	}
+
+	.highlight {
+		color: navy;
+		font-weight: 500;
+		background-color: lightyellow;
+	}
+
+	.noun {
+		color: navy;
+		font-weight: 500;
+		background-color: lightyellow;
+	}
+
+	.verb {
+		color: navy;
+		font-weight: 500;
+		background-color: beige;
+		display: inline-block;
+		border: 1px solid brown;
+		padding: 2px 5px;
+	}
+
+	.word {
+		font-weight: 500;
+	}
+
+	.meaning {
+		color: brown;
+	}
+
+	.vocabularyTestTitle {
+		margin: 5px 0 0 0;
+		font-style: italic;
+	}
+
+	.meaningListWord {
+		margin: 0 0 0 10px;
+		color: brown;
+	}
+
+	h3 {
+		font-size: 22px;
+		margin: 20px 0 10px 0 !important;
+	}
+
+	.interactiveFlashcardsArea {
+		border: 1px solid #ccc;
+		padding: 10px;
+	}
+
+	.flashcard1 {
+		font-weight: 500;
+		color: navy;
+		cursor: pointer;
+	}
+
+	.flashcard1Back {
+		font-weight: 500;
+		color: brown;
+	}
+
+	.lookupIcon {
+		font-weight: 500;
+		color: navy;
+	}
+</style>
+
+<div id="app" class="pageContent">
+
+	<h3 style="display:none">Showcase: Regex</h3>
+
+	<div class="developerArea" v-for="item in htmlAreas">
+		<div class="header">{{item.functionName}}()</div>
+		<div class="text">{{item.text}}</div>
+
+		<div class="theRegexAreaShow theRegexArea" v-show="item.regexAreaShowing" @click="toggleRegexArea(item)">
+			<div v-for="regexInfo in item.regexInfos">{{regexInfo}}</div>
+		</div>
+		<div class="theRegexAreaTrigger theRegexArea" v-show="!item.regexAreaShowing" @click="toggleRegexArea(item)">
+			&nbsp;show regex
+			info&nbsp;
+		</div>
+
+		<div class="parsedText" v-html='item.parsedText'></div>
+	</div>
+
+	<h3>Interactive Flashcards in Text</h3>
+	<div class="interactiveFlashcardsArea">
+		<template v-for="smartPart in smartParts">
+			<span v-if="smartPart.kind=='flashcard'"><span v-show="smartPart.flashcard1Showing"><a target="_blank"
+						:href="'https://tatoeba.org/eng/sentences/search?query=' + smartPart.front + '&from=fra&to=eng'">
+						<i class="fa fa-external-link lookupIcon"></i></a></span> <span class="flashcard1"
+					@click="toggleFlashcard1(smartPart)">{{smartPart.front}}</span> <span class="flashcard1Back"
+					v-show="smartPart.flashcard1Showing"> ({{smartPart.back}}) </span></span>
+			<span v-if="smartPart.kind=='filler'">{{smartPart.text}} </span>
+		</template>
+	</div>
+
+
+	<div v-show="pageStatus == 'busy'"><i class="fa fa-spinner fa-pulse page_loading_spinner" aria-hidden="true"></i>
+	</div>
+
+</div>
+
+<script>
+	const app = new Vue({
+		el: '#app',
+		data: {
+			pageStatus: 'ready',
+			htmlAreas: [],
+			smartParts: []
+		},
+		methods: {
+			initialize: function () {
+				$('.bodyContent').show();
+				this.loadPageData();
+			},
+			loadPageData: function () {
+				this.pageStatus = 'busy';
+				const that = this;
+				axios({
+					method: 'post',
+					url: 'controllerShowcaseRegex',
+					data: {
+						action: 'loadPageData'
+					}
+				}).then(function (responseObject) {
+					const response = qsys.getResponse(responseObject);
+					that.htmlAreas = response.data.htmlAreas;
+					that.smartParts = response.data.smartParts;
+
+					for (const htmlArea of that.htmlAreas) {
+						htmlArea.regexAreaShowing = false;
+					}
+
+					for (const smartPart of that.smartParts) {
+						smartPart.flashcard1Showing = false;
+					}
+
+					that.pageStatus = 'ready';
+				}).catch(function (error) {
+					that.pageStatus = 'failed';
+				});
+			},
+			toggleRegexArea(item) {
+				item.regexAreaShowing = !item.regexAreaShowing;
+				this.$forceUpdate();
+			},
+			toggleFlashcard1(smartPart) {
+				smartPart.flashcard1Showing = !smartPart.flashcard1Showing;
+				this.$forceUpdate();
+			}
+		}
+	});
+	app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

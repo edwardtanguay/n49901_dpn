@@ -1,0 +1,62 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+<style>
+	ul.theList li {
+		line-height: .5;
+	}
+</style>
+
+<div id="app" class="pageContent">
+
+	<h3>Showcase: Screen Scraping</h3>
+
+	<div v-show="pageStatus == 'ready'">
+		<h5>Hacker News</h5>
+		<ul class="theList" v-for="item in linkItems">
+			<li><a :href="item.link">{{item.title}}</a></li>
+		</ul>
+	</div>
+
+	<div v-show="pageStatus == 'busy'"><i class="fa fa-spinner fa-pulse page_loading_spinner" aria-hidden="true"></i>
+	</div>
+
+</div>
+
+<script>
+	const app = new Vue({
+		el: '#app',
+		data: {
+			pageStatus: 'ready',
+			linkItems: []
+		},
+		methods: {
+			initialize: function () {
+				$('.pageContent').fadeIn(100);
+				this.loadPageData();
+			},
+			loadPageData: function () {
+				this.pageStatus = 'busy';
+				const that = this;
+				axios({
+					method: 'post',
+					url: 'controllerShowcaseScreenScraping',
+					data: {
+						action: 'loadPageData'
+					}
+				}).then(function (responseObject) {
+					const response = qsys.getResponse(responseObject);
+					that.linkItems = response.data.linkItems;
+					that.pageStatus = 'ready';
+				}).catch(function (error) {
+					that.pageStatus = 'failed';
+				});
+			}
+		}
+	});
+	app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

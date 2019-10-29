@@ -1,0 +1,15 @@
+.system_page_content {
+  padding: 20px;
+}
+a.pageSelected {
+  font-weight: bold;
+}
+a.applicationShortTitle {
+  text-decoration: none;
+  color: black;
+}
+a.applicationShortTitle:link,
+a.applicationShortTitle:hover,
+a.applicationShortTitle:active {
+  color: black;
+}

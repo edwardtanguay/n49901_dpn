@@ -1,0 +1,21 @@
+"use strict"
+const qstr = require('../qtools/qstr');
+const @@inheritDataTypeClassName = require('./@@inheritDataTypeClassFileName');
+
+class @@dataTypeClassName extends @@inheritDataTypeClassName {
+    constructor(label, extras = "") {
+        super(label, extras);
+    }
+
+    validate() {
+        super.validate();
+        return this.validationResponse();
+    }
+    
+    //getNiceValue(item) {
+    //  return '<span class="@@theDataTypeClassNameCamelNotation">' + this.getValue(item) + '</span>';
+    //}
+
+}
+
+module.exports = @@dataTypeClassName;

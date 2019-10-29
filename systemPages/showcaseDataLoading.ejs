@@ -1,0 +1,132 @@
+<%- include(data.system_layout_header)  %>
+<% 
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery
+//DYNAMIC_VARIABLE:data=load_pageItems(all) as singlePageItems
+//DYNAMIC_VARIABLE:data=load_users(id > 2 order by lastName desc)
+//DYNAMIC_VARIABLE:data=load_pageItems(all)
+//DYNAMIC_VARIABLE:data=load_richUserRecords as richItems
+//DYNAMIC_VARIABLE:data=build_completeReport as completeReportRecords
+//DYNAMIC_VARIABLE:data=load_user(id=6) as currentUser
+//DYNAMIC_VARIABLE:data=load_pageItem(idCode="home")
+//DYNAMIC_VARIABLE:data=load_showcaseBooks(all)
+//DYNAMIC_VARIABLE:data=load_showcaseBook(id=340) as selectedBook
+%>
+
+
+<p>For examples of basic getRecord() / getRecords() / executeSql() access to the database, search for
+        "showcaseDataLoading" in server.js, and uncomment.</p>
+
+
+<table border="1">
+        <tr>
+                <th>ID</th>
+                <th>ID-Code</th>
+                <th>Title</th>
+        </tr>
+        <% data.singlePageItems.forEach(function(item) { %>
+        <tr>
+                <td>
+                        <%= item.id %>
+                </td>
+                <td>
+                        <%= item.idCode %>
+                </td>
+                <td>
+                        <%= item.title %>
+                </td>
+        </tr>
+        <% }); %>
+</table>
+
+<hr />
+<table border="1">
+        <tr>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+        </tr>
+        <% data.users.forEach(function(user) { %>
+        <tr>
+                <td>
+                        <%= user.id %>
+                </td>
+                <td>
+                        <%= user.firstName %>
+                </td>
+                <td>
+                        <%= user.lastName %>
+                </td>
+        </tr>
+        <% }); %>
+</table>
+
+<hr />
+
+
+<table border="1">
+        <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+        </tr>
+        <% data.richItems.forEach(function(record) { %>
+        <tr>
+                <td>
+                        <%= record.firstName %>
+                </td>
+                <td>
+                        <%= record.lastName %>
+                </td>
+        </tr>
+        <% }); %>
+</table>
+
+<hr />
+
+<table border="1">
+        <tr>
+                <th>Collection</th>
+                <th>Total</th>
+        </tr>
+        <% data.completeReportRecords.forEach(function(record) { %>
+        <tr>
+                <td>
+                        <%= record.name %>
+                </td>
+                <td>
+                        <%= record.total %>
+                </td>
+        </tr>
+        <% }); %>
+</table>
+
+<hr />
+
+<table border="1">
+        <tr>
+                <th>ID</th>
+                <th>Title</th>
+        </tr>
+        <% data.showcaseBooks.forEach(function(item) { %>
+        <tr>
+                <td>
+                        <%= item.id %>
+                </td>
+                <td>
+                        <%= item.title %>
+                </td>
+        </tr>
+        <% }); %>
+</table>
+<hr />
+
+<p>The selected book is
+        <%=data.selectedBook.title%>.</p>
+
+
+<hr />
+
+<p>The current user is
+        <%=data.system_currentUser.firstName %>
+        <%=data.system_currentUser.lastName %>.</p>
+
+<%- include(data.system_layout_footer)  %>

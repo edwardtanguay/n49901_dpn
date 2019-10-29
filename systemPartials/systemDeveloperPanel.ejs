@@ -1,0 +1,36 @@
+<%
+if(data.system_developer) {
+%>
+<div class="system_developerPanel">
+    <ul>
+        <li>current layout: <code><%=data.system_layout%></code></li>
+        <li>current page: <code><%=data.system_currentPageItemIdCode%></code></li>
+
+        <li>current extensions loaded on page:
+            <%
+            data.system_extensionIdCodes.forEach(function(item, index) { 
+            %>
+            <code><%=item%></code>
+            <%=data.system_extensionIdCodes.length-1 != index ? ',' : '';%>
+            <%
+            });
+            %>
+        </li>
+
+        <li>available extensions:
+            <%
+            data.system_availableExtensionIdCodes.forEach(function(item, index) { 
+            %>
+            <code><%=item%></code>
+            <%=data.system_availableExtensionIdCodes.length-1 != index ? ',' : '';%>
+            <%
+            });
+            %>
+        </li>
+        <li><a href="https://fontawesome.bootstrapcheatsheets.com/#" target="_blank">font awesome selection</a>
+
+    </ul>
+</div>
+<%
+}
+%>

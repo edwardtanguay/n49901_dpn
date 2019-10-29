@@ -1,0 +1,339 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+<div id="app">
+
+    <div class="card smartFormCard">
+        <div class="card-header">
+            <div class="pull-left" :class="{areaLoading: pageStatus=='busy'}">Create Class</div>
+            <div class="pull-right">
+                <i v-if="pageStatus!='ready'" class="pull-left fa fa-cog fa-spin waitSpinner"></i>
+            </div>
+        </div>
+        <div class="card-body smartFormBody" :class="{areaLoading: pageStatus=='busy'}">
+            <div class="messageArea" style="display:none">
+                <div v-if="formStatus=='success'" class="alert alert-success" v-html="formMessage"></div>
+                <div v-if="formStatus=='invalid'" class="alert alert-danger">
+                    <strong>Form is invalid:</strong> {{formMessage}}
+                </div>
+                <div v-if="formStatus=='error'" class="alert alert-danger">
+                    <strong>Error:</strong> <span v-html="formMessage"></span>
+                </div>
+            </div>
+            <div v-show="pageStatus!='busy'" class="bodyContent" style="display:none">
+
+
+
+                <!-- field: EXAMPLECODE -->
+                <dl v-show="formStatus=='success'">
+                    <dt><span v-if="fields.exampleCode.required">*</span>{{fields.exampleCode.label}}</dt>
+                    <dd>
+                        <div>
+                            <textarea style="height:160px" readonly id="field_exampleCode" :disabled="pageStatus=='busy'"
+                                v-model="fields.exampleCode.value" @keydown="keyWasPressed" @keyup="keyWasPressed"
+                                class="form-control dataType_paragraph"></textarea>
+                        </div>
+                        <div>
+                            <small v-if="fields.exampleCode.errorMessage != ''" class="error">{{fields.exampleCode.errorMessage}}
+                            </small>
+                            <small v-if="fields.exampleCode.info" class="info">{{fields.exampleCode.info}} </small>
+                            <small v-if="fields.exampleCode.example" class="example"><span class="exampleLabel">Example:</span> <span class="exampleText">{{fields.exampleCode.example}}</span>
+                            </small>
+                        </div>
+                    </dd>
+                </dl>
+
+                <!-- field: CLASSNAME -->
+                <dl class="dataType_line">
+                    <dt><span v-if="fields.className.required">*</span>{{fields.className.label}}</dt>
+                    <dd>
+                        <div>
+                            <input id="field_className" v-model="fields.className.value" class="form-control dataType_line"
+                                @keydown="keyWasPressed" @keyup="keyWasPressed" v-on:keyup.enter="onEnterClick()"
+                                :disabled="pageStatus=='busy'" />
+                        </div>
+                        <div>
+                            <small v-if="fields.className.errorMessage != ''" class="error">{{fields.className.errorMessage}}
+                            </small>
+                            <small v-if="fields.className.info" class="info">{{fields.className.info}} </small>
+                            <small v-if="fields.className.example" class="example"><span class="exampleLabel">Example:</span> <span class="exampleText">{{fields.className.example}}</span>
+                            </small>
+                        </div>
+                    </dd>
+                </dl>
+          
+
+                <!-- field: DIRECTORY -->
+                <dl>
+                    <dt class="dataType_choice"><span v-if="fields.directory.required">*</span>{{fields.directory.label}}</dt>
+                    <dd>
+                        <!--radioVertical-->
+                        <div v-if="fields.directory.choiceSelector == 'radioVertical'" class="display_radioVertical">
+                            <ul>
+                                <li v-for="choice in fields.directory.choices">
+                                    <label class="prohibitSelectionClickable" v-on:keyup.enter="onEnterClick()"><input
+                                            type="radio" v-model="fields.directory.value" :value="choice.idCode">
+                                        {{choice.idCode}}</label></li>
+                            </ul>
+                        </div>
+                        <!--radioHorizontal-->
+                        <div v-if="fields.directory.choiceSelector == 'radioHorizontal'" class="display_radioHorizontal">
+                            <ul>
+                                <li v-for="choice in fields.directory.choices">
+                                    <label class="prohibitSelectionClickable" v-on:keyup.enter="onEnterClick()"><input
+                                            type="radio" v-model="fields.directory.value" :value="choice.idCode">
+                                        {{choice.idCode}}</label></li>
+                            </ul>
+                        </div>
+                        <!--dropdown-->
+                        <div v-if="fields.directory.choiceSelector == 'dropdown'" class="display_dropdown">
+                            <select v-model="fields.directory.value">
+                                <option v-for="choice in fields.directory.choices" :value="choice.idCode">
+                                    {{choice.idCode}}</option>
+                            </select>
+                        </div>
+                        <div>
+                            <small v-if="fields.directory.errorMessage != ''" class="error">{{fields.directory.errorMessage}}
+                            </small>
+                            <small v-if="fields.directory.info" class="info">{{fields.directory.info}} </small>
+                            <small v-if="fields.directory.example" class="example"><span class="exampleLabel">Example:</span> <span class="exampleText">{{fields.directory.example}}</span>
+                            </small>
+                        </div>
+                    </dd>
+                </dl>
+
+                <!-- field: SCOPE -->
+                <dl v-show="false">
+                    <dt class="dataType_choice"><span v-if="fields.scope.required">*</span>{{fields.scope.label}}</dt>
+                    <dd>
+                        <!--radioVertical-->
+                        <div v-if="fields.scope.choiceSelector == 'radioVertical'" class="display_radioVertical">
+                            <ul>
+                                <li><label class="prohibitSelectionClickable" v-on:keyup.enter="onEnterClick()"><input
+                                            type="radio" v-model="fields.scope.value" value="single"> Single</label></li>
+                                <li><label class="prohibitSelectionClickable" v-on:keyup.enter="onEnterClick()"><input
+                                            type="radio" v-model="fields.scope.value" value="inherited"> Inherited</label></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <small v-if="fields.scope.errorMessage != ''" class="error">{{fields.scope.errorMessage}}
+                            </small>
+                            <small v-if="fields.scope.info" class="info">{{fields.scope.info}} </small>
+                            <small v-if="fields.scope.example" class="example"><span class="exampleLabel">Example:</span> <span class="exampleText">{{fields.scope.example}}</span>
+                            </small>
+                        </div>
+                    </dd>
+                </dl>
+
+                <!-- form notes -->
+                <div class="pull-left formNotes">
+                    <span v-if="thereAreRequiredFields()" class="requiredFieldMarker">* required field</span>
+                </div>
+
+                <!-- submit button -->
+                <div class="pull-right">
+                    <button id="buttonSubmit" :disabled="formSubmitButtonShouldBeDisabled()" @click="processForm()"
+                        class="btn btn-default formButton">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            clientSideEmptyFieldChecking: false,
+            pageStatus: 'ready',
+            formStatus: '',
+            formMessage: '',
+            fields: {
+                className: {
+                    label: '',
+                    dataTypeIdCode: '',
+                    value: '',
+                    info: '',
+                    example: '',
+                    required: false,
+                    errorStatus: '',
+                    errorMessage: '',
+                    displayStatus: '',
+                    choices: '',
+                    choiceSelector: ''
+                },
+                directory: {
+                    label: '',
+                    dataTypeIdCode: '',
+                    value: '',
+                    info: '',
+                    example: '',
+                    required: false,
+                    errorStatus: '',
+                    errorMessage: '',
+                    displayStatus: '',
+                    choices: '',
+                    choiceSelector: ''
+                },
+                scope: {
+                    label: '',
+                    dataTypeIdCode: '',
+                    value: '',
+                    info: '',
+                    example: '',
+                    required: false,
+                    errorStatus: '',
+                    errorMessage: '',
+                    displayStatus: '',
+                    choices: '',
+                    choiceSelector: ''
+                },
+                exampleCode: {
+                    label: '',
+                    dataTypeIdCode: '',
+                    value: '',
+                    info: '',
+                    example: '',
+                    required: false,
+                    errorStatus: '',
+                    errorMessage: '',
+                    displayStatus: '',
+                    choices: '',
+                    choiceSelector: ''
+                }
+            }
+        },
+        methods: {
+            initialize: function () {
+                $('.bodyContent').show();
+                $('.messageArea').show();
+                this.loadPageData();
+            },
+            loadPageData: function () {
+                this.pageStatus = 'busy';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'controllerCreateClass',
+                    data: {
+                        action: 'loadPageData'
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+                    that.fields = response.data.fields;
+                    that.focusField(formFocusedFieldIdCode);
+                    that.pageStatus = 'ready';
+                }).catch(function (error) {
+                    that.pageStatus = 'failed';
+                });
+            },
+            processForm: function () {
+                this.pageStatus = 'busy';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'controllerCreateClass',
+                    data: {
+                        action: 'processForm',
+                        fields: that.fields
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+                    that.formStatus = response.formStatus;
+                    that.formMessage = response.formMessage;
+                    that.fields = response.data.fields;
+                    console.log(formFocusedFieldIdCode);
+                    that.focusField(formFocusedFieldIdCode);
+                    that.pageStatus = 'ready';
+                }).catch(function (error) {
+                    that.formMessageKind = 'error';
+                    that.formMessage = 'An unknown error occurred.';
+                });
+            },
+            onEnterClick: function () {
+                $('#buttonSubmit').click();
+            },
+            qstr_isEmpty: function (line) {
+                return qstr.isEmpty(line);
+            },
+            formSubmitButtonShouldBeDisabled: function () {
+                if (!this.clientSideEmptyFieldChecking) {
+                    return false;
+                }
+                if (this.pageStatus == 'busy') {
+                    return true;
+                }
+                for (const key in this.fields) {
+                    const field = this.fields[key];
+                    if (field.required && qstr.isEmpty(field.value)) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            keyWasPressed: function (e) {
+
+                if (e.keyCode === 13 && e.ctrlKey) {
+                    this.onEnterClick();
+                }
+
+                this.formSubmitButtonShouldBeDisabled();
+
+                let thereAreErrors = false;
+
+                //empty fields
+                for (const idCode in this.fields) {
+                    const field = this.fields[idCode];
+                    if (field.required && qstr.isEmpty(field.value)) {
+                        this.setDataInFields(idCode, 'errorMessage', 'This value is required and cannot be empty.');
+                        thereAreErrors = true;
+                    } else {
+                        this.setDataInFields(idCode, 'errorMessage', '');
+                    }
+                }
+            },
+            focusField: function (fieldIdCode) {
+                setTimeout(function () {
+                    $('#field_' + fieldIdCode).focus();
+                }, 50);
+            },
+            setDataInFields: function (idCode, property, value) {
+                const field = `${idCode}.${property}`;
+                _.set(this.fields, field, value)
+
+            },
+            thereAreRequiredFields: function () {
+                for (const idCode in this.fields) {
+                    const field = this.fields[idCode];
+                    if (field.required) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            switchChoiceSelector: function (field) {
+                switch (field.choiceSelector) {
+                    case 'radioVertical':
+                        field.choiceSelector = 'dropdown';
+                        break;
+                    case 'dropdown':
+                        field.choiceSelector = 'radioHorizontal';
+                        break;
+                    case 'radioHorizontal':
+                    default:
+                        field.choiceSelector = 'radioVertical';
+                        break;
+                }
+            }
+        }
+    });
+    app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

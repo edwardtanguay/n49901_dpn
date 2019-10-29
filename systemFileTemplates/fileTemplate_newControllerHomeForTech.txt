@@ -1,0 +1,136 @@
+"use strict"
+const Controller = require('./controller');
+const DpDataLoader = require('../systemClasses/dpDataLoader');
+const qsys = require('../qtools/qsys');
+const qdev = require('../qtools/qdev');
+const qdat = require('../qtools/qdat');
+const qstr = require('../qtools/qstr');
+const dpod = require('../system/dpod');
+const System = require('../system/system');
+
+class ControllerHome extends Controller {
+	constructor(request, response) {
+		super(request, response);
+	}
+
+	action_loadPageData() {
+		const dpDataLoader = new DpDataLoader();
+		dpDataLoader.getRecordsWithSql('forayRecords', 'select * from forays');
+		dpDataLoader.getRecordsWithSql('howtoRecords', 'select * from howtos');
+		dpDataLoader.getRecordsWithSql('techItemRecords', 'select * from techItems');
+		dpDataLoader.getRecordsWithSql('comparisonRecords', 'select * from comparisons');
+		dpDataLoader.getRecordsWithSql('techTopicGroupRecords', 'select * from techTopicGroups');
+		dpDataLoader.getRecordsWithSql('tipRecords', 'select * from tips');
+
+		const that = this;
+		dpDataLoader.load(function (data) {
+
+			const searchDataitems = [];
+
+
+			// FORAY
+			const forayItemObjects = System.instantiateItemObjectsWithRecords('forays', data.forayRecords);
+			for (const foray of forayItemObjects) {
+				const searchObject = {
+					id: foray.id,
+					kind: 'Foray',
+					title: foray.title,
+					body: foray.body,
+					whenCreated: foray.systemWhenCreated,
+					niceDate: qdat.getShortMonthDay(foray.systemWhenCreated),
+					permalinkUrl: foray.getPermalinkUrl()
+				};
+				searchDataitems.push(searchObject)
+			}
+
+			// HOWTO
+			const howtoItemObjects = System.instantiateItemObjectsWithRecords('howtos', data.howtoRecords);
+			for (const howto of howtoItemObjects) {
+				const searchObject = {
+					id: howto.id,
+					kind: 'Howto',
+					title: howto.title,
+					body: howto.body,
+					whenCreated: howto.systemWhenCreated,
+					niceDate: qdat.getShortMonthDay(howto.systemWhenCreated),
+					permalinkUrl: howto.getPermalinkUrl()
+				};
+				searchDataitems.push(searchObject)
+			}
+
+			// TECHITEM
+			const techItemItemObjects = System.instantiateItemObjectsWithRecords('techItems', data.techItemRecords);
+			for (const techItem of techItemItemObjects) {
+				const searchObject = {
+					id: techItem.id,
+					kind: 'Tech Item',
+					title: techItem.title,
+					body: techItem.body,
+					whenCreated: techItem.systemWhenCreated,
+					niceDate: qdat.getShortMonthDay(techItem.systemWhenCreated),
+					permalinkUrl: techItem.getPermalinkUrl()
+				};
+				searchDataitems.push(searchObject)
+			}
+
+			// COMPARISON
+			const comparisonItemObjects = System.instantiateItemObjectsWithRecords('comparisons', data.comparisonRecords);
+			for (const comparison of comparisonItemObjects) {
+				const searchObject = {
+					id: comparison.id,
+					kind: 'Comparison',
+					title: comparison.techItemList,
+					body: comparison.body,
+					whenCreated: comparison.systemWhenCreated,
+					niceDate: qdat.getShortMonthDay(comparison.systemWhenCreated),
+					permalinkUrl: comparison.getPermalinkUrl()
+				};
+				searchDataitems.push(searchObject)
+			}
+
+			// TECHTOPICGROUP
+			const techTopicGroupItemObjects = System.instantiateItemObjectsWithRecords('techTopicGroups', data.techTopicGroupRecords);
+			for (const techTopicGroup of techTopicGroupItemObjects) {
+				const searchObject = {
+					id: techTopicGroup.id,
+					kind: 'Tech Topic Group',
+					title: techTopicGroup.title,
+					description: techTopicGroup.description,
+					whenCreated: techTopicGroup.systemWhenCreated,
+					niceDate: qdat.getShortMonthDay(techTopicGroup.systemWhenCreated),
+					permalinkUrl: techTopicGroup.getPermalinkUrl()
+				};
+				searchDataitems.push(searchObject)
+			}
+
+			// TIP
+			const tipItemObjects = System.instantiateItemObjectsWithRecords('tips', data.tipRecords);
+			for (const tip of tipItemObjects) {
+				const searchObject = {
+					id: tip.id,
+					kind: 'Tip',
+					title: tip.title,
+					whenCreated: tip.systemWhenCreated,
+					niceDate: qdat.getShortMonthDay(tip.systemWhenCreated),
+					permalinkUrl: tip.getPermalinkUrl()
+				};
+				searchDataitems.push(searchObject)
+			}
+
+
+			that.responseData.searchDataitems = searchDataitems;
+
+			//that.responseData.userIsCurrentlyLoggedIn = qsys.userIsCurrentlyLoggedIn(that.request);
+
+			qsys.currentUserData(that.request, function (userData) {
+				that.responseData.userData = userData;
+				that.sendResponse();
+			});
+		});
+	}
+
+
+
+}
+
+module.exports = ControllerHome

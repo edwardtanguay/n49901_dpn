@@ -1,0 +1,51 @@
+"use strict"
+const Controller = require('./controller');
+const DpDataLoader = require('../systemClasses/dpDataLoader');
+const qsys = require('../qtools/qsys');
+const qdev = require('../qtools/qdev');
+const qstr = require('../qtools/qstr');
+const ShowcaseBook = require('../systemItems/showcaseBook');
+const markdown = require("markdown").markdown;
+
+class @@controllerClassName extends Controller {
+    constructor(request, response) {
+        super(request, response);
+    }
+
+
+    customFormValidation(field, errors) {
+        // if (field.idCode == 'title' && qstr.contains(field.value, '.')) {
+        //     this.addFormError(field, 'should not contain a period character');
+        // }
+    }
+
+    action_loadPageData() {
+
+        this.responseStatus = 'loaded';
+        this.formTypeDefinitionFieldBlock = `
+Input Text;p; $info = Note: The TAB key works in this box.
+Output Text;p
+        `;
+        this.responseData = {};
+        this.prepareFields();
+        this.responseData.fields.inputText.value = 
+`You can write in *italics* or **bold** or type come code, e.g. \`CTRL-C\`.
+`;
+        this.sendResponse();        
+    }
+
+    action_processForm() {
+        const isValid = this.validateForm();
+        if (isValid) {
+
+            const markdownText = this.requestData.fields.inputText.value;
+            const html = markdown.toHTML(markdownText);
+            this.requestData.fields.outputText.value = html;
+
+            this.sendResponse();
+        }
+    }
+
+}
+
+module.exports = @@controllerClassName

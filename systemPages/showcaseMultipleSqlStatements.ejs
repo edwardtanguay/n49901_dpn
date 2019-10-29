@@ -1,0 +1,97 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+<style>
+    h4:not(.first) {
+        margin-top: 20px;
+    }
+</style>
+
+<div id="app" class="pageContent">
+
+    <h3>Showcase: Multiple SQL Statements</h3>
+
+    <h4 class="first">Showcase Books</h4>
+    <div v-show="showcaseBooks.length > 0 && pageStatus == 'ready'">
+        <table class="table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th v-for="(fieldValue, fieldIdCode) in showcaseBooks[0]">
+                        {{ fieldIdCode }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="record in showcaseBooks">
+                    <td v-for="fieldValue of record">
+                        {{fieldValue}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h4>Showcase Users</h4>
+    <div v-show="showcaseUsers.length > 0 && pageStatus == 'ready'">
+        <table class="table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th v-for="(fieldValue, fieldIdCode) in showcaseUsers[0]">
+                        {{ fieldIdCode }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="record in showcaseUsers">
+                    <td v-for="fieldValue of record">
+                        {{fieldValue}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <div v-show="pageStatus == 'busy'"><i class="fa fa-spinner fa-pulse page_loading_spinner" aria-hidden="true"></i>
+    </div>
+
+</div>
+
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            pageStatus: 'ready',
+            showcaseBooks: [],
+            showcaseUsers: []
+        },
+        methods: {
+            initialize: function () {
+                $('.bodyContent').show();
+                this.loadPageData();
+            },
+            loadPageData: function () {
+                this.pageStatus = 'busy';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'controllerShowcaseMultipleSqlStatements',
+                    data: {
+                        action: 'loadPageData'
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    that.showcaseBooks = response.data.showcaseBooks;
+                    that.showcaseUsers = response.data.showcaseUsers;
+                    that.pageStatus = 'ready';
+                }).catch(function (error) {
+                    that.pageStatus = 'failed';
+                });
+            }
+        }
+    });
+    app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

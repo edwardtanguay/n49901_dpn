@@ -1,0 +1,241 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+<style>
+    .processDescription {
+        font-style: italic;
+        color: #bbb;
+    }
+</style>
+<div id="app" style="display:none">
+
+    <div class="card smartFormCard">
+        <div class="card-header">
+            <div class="pull-left" :class="{areaLoading: pageStatus=='busy'}">@@pageTitle</div>
+            <div class="pull-right">
+                <div class="pull-left headerInfo"></div>
+            </div>
+        </div>
+        <div class="card-body smartFormBody">
+            <div class="messageArea" style="display:none" :class="{areaLoading: pageStatus=='busy'}">
+                <div v-show="formStatus=='success'" class="alert alert-success" v-html="formMessage"></div>
+                <div v-show="formStatus=='invalid'" class="alert alert-danger">
+                    <strong>Form is invalid:</strong> {{formMessage}}
+                </div>
+                <div v-show="formStatus=='error'" class="alert alert-danger">
+                    <strong>Error:</strong> <span v-html="formMessage"></span>
+                </div>
+            </div>
+            <div v-show="pageStatus!='busy'" class="bodyContent" :class="{areaLoading: pageStatus=='busy'}"
+                style="display:none">
+
+                <!-- form notes -->
+                <div class="pull-left formNotes">
+                    <span v-show="thereAreRequiredFields()" class="requiredFieldMarker">* required field</span>
+				</div>
+				<div class="clear"></div>
+
+                <!-- start button -->
+                <div class="pull-right">
+                    <button id="buttonSubmit" :disabled="formSubmitButtonShouldBeDisabled()" @click="processNextStep()"
+                        class="btn btn-default formButton">Start</button>
+                </div>
+            </div>
+            <div v-show="pageStatus=='busy'" class="processMessage" style="display:none">
+                <div>
+                    <i v-show="pageStatus!='ready'" class="pull-left fa fa-cog fa-spin waitSpinnerInBody"
+                        style="display:none"></i> {{showProcessMessage()}}</div>
+                <div class="processDescription">{{showProcessDescription()}}</div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            clientSideEmptyFieldChecking: false,
+            pageStatus: 'ready',
+            formStatus: '',
+            formMessage: '',
+            processMessage: '',
+            currentStep: {},
+            currentStepNumber: 0,
+            steps: [
+                {
+                    idCode: 'checkingForSpace',
+                    message: 'checking for space',
+                    description: 'This will take about 4 seconds.'
+                },
+                {
+                    idCode: 'preparingForCopying',
+                    message: 'preparing for copying',
+                    description: 'This will take about 3 seconds.'
+                },
+                {
+                    idCode: 'copyingFiles',
+                    message: 'copying files',
+                    description: 'This will take about 6 seconds.'
+                }
+            ]
+        },
+        methods: {
+            initialize: function () {
+                $('.bodyContent').show();
+                $('.messageArea').show();
+                $('#app').fadeIn(50);
+                this.loadPageData();
+            },
+            loadPageData: function () {
+                this.pageStatus = 'busy';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: '@@controllerIdCode',
+                    data: {
+                        action: 'loadPageData'
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+                    that.fields = response.data.fields;
+                    that.focusField(formFocusedFieldIdCode);
+                    that.pageStatus = 'ready';
+                }).catch(function (error) {
+                    that.pageStatus = 'failed';
+                });
+            },
+            processNextStep: function () {
+                this.pageStatus = 'busy';
+                this.formStatus = '';
+                this.formMessage = '';
+                if (this.currentStepNumber == this.steps.length) {
+                    this.pageStatus = 'ready';
+                    this.formStatus = 'success';
+                    this.formMessage = 'Finished.';
+                    this.currentStepNumber = 0;
+                } else {
+                    this.incrementStep();
+                    this.processMessage = this.currentStep.message;
+                    const that = this;
+                    axios({
+                        method: 'post',
+                        url: '@@controllerIdCode',
+                        data: {
+                            action: this.currentStep.idCode,
+                            fields: that.fields
+                        }
+                    }).then(function (responseObject) {
+                        const response = qsys.getResponse(responseObject);
+                        const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+                        that.formStatus = response.formStatus;
+                        that.formMessage = response.formMessage;
+                        that.fields = response.data.fields;
+                        that.focusField(formFocusedFieldIdCode);
+                        setTimeout(that.processNextStep, 1000);
+
+                    }).catch(function (error) {
+                        that.formMessageKind = 'error';
+                        that.formMessage = 'An unknown error occurred.';
+                    });
+                }
+            },
+            onEnterClick: function () {
+                $('#buttonSubmit').click();
+            },
+            qstr_isEmpty: function (line) {
+                return qstr.isEmpty(line);
+            },
+            formSubmitButtonShouldBeDisabled: function () {
+                if (!this.clientSideEmptyFieldChecking) {
+                    return false;
+                }
+                if (this.pageStatus == 'busy') {
+                    return true;
+                }
+                for (const key in this.fields) {
+                    const field = this.fields[key];
+                    if (field.required && qstr.isEmpty(field.value)) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            keyWasPressed: function (e) {
+
+                if (e.keyCode === 13 && e.ctrlKey) {
+                    this.onEnterClick();
+                }
+
+                this.formSubmitButtonShouldBeDisabled();
+
+                let thereAreErrors = false;
+
+                //empty fields
+                for (const idCode in this.fields) {
+                    const field = this.fields[idCode];
+                    if (field.required && qstr.isEmpty(field.value)) {
+                        this.setDataInFields(idCode, 'errorMessage', 'This value is required and cannot be empty.');
+                        thereAreErrors = true;
+                    } else {
+                        this.setDataInFields(idCode, 'errorMessage', '');
+                    }
+                }
+            },
+            focusField: function (fieldIdCode) {
+                setTimeout(function () {
+                    $('#field_' + fieldIdCode).focus();
+                }, 50);
+            },
+            setDataInFields: function (idCode, property, value) {
+                const field = `${idCode}.${property}`;
+                _.set(this.fields, field, value)
+
+            },
+            thereAreRequiredFields: function () {
+                for (const idCode in this.fields) {
+                    const field = this.fields[idCode];
+                    if (field.required) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            switchChoiceSelector: function (field) {
+                switch (field.choiceSelector) {
+                    case 'radioVertical':
+                        field.choiceSelector = 'dropdown';
+                        break;
+                    case 'dropdown':
+                        field.choiceSelector = 'radioHorizontal';
+                        break;
+                    case 'radioHorizontal':
+                    default:
+                        field.choiceSelector = 'radioVertical';
+                        break;
+                }
+            },
+            showProcessMessage: function () {
+                return qstr.capitalizeFirstLetter(this.processMessage) + '...';
+            },
+            showProcessDescription: function () {
+                if (this.currentStep != null) {
+                    return this.currentStep.description;
+                } else {
+                    return '';
+                }
+            },
+            incrementStep: function () {
+                this.currentStepNumber++;
+                this.currentStep = this.steps[this.currentStepNumber - 1];
+            }
+        }
+    });
+    app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

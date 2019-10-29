@@ -1,0 +1,331 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+<style>
+	.searchText {
+		margin: 0 0 10px 0;
+	}
+
+	.debugArea {
+		background-color: #eee;
+		margin: 20px 0 0 0;
+		padding: 10px;
+		border: 1px solid #ddd;
+		border-radius: 5px;
+		font-family: courier;
+		font-size: 13px;
+		color: #aaa;
+	}
+
+	table.data th {
+		cursor: pointer;
+	}
+
+	div.dataSupertitle {
+		color: #555;
+		font-size: 14px;
+		margin: 0 0 5px 0;
+	}
+
+	span.sortTitle {}
+
+	span.showInfo {
+		text-decoration: underline;
+		cursor: pointer;
+	}
+
+	th.column_id {
+		min-width: 60px;
+	}
+
+	th.column_firstName {
+		width: 170px;
+	}
+
+	th.column_lastName {
+		width: 170px;
+	}
+
+	th.column_status {
+		width: 190px;
+	}
+
+	td.column_id {
+		width: 50px;
+		text-align: right;
+	}
+
+	div.area_search {
+		margin: 0 0 15px 0;
+	}
+
+	div.area_data {
+		float: left;
+	}
+
+	div.area_info {
+		float: left;
+		background: #eee;
+		padding: 5px;
+		border: 1px solid #ddd;
+		border-radius: 5px;
+		margin: 10px 0 0 0;
+		width: 200px;
+	}
+
+	/* smartphone */
+	@media (max-width: 767px) {
+		div.area_info {
+			margin: 10px 0 0 0;
+		}
+	}
+
+	/* tablet/computer */
+	@media (min-width: 768px) {
+		div.area_info {
+			margin: 25px 0 0 10px;
+		}
+	}
+
+	.manageIcon {
+		cursor: pointer;
+	}
+
+	.iconClearSearch {
+		margin: 2px 0 0 6px;
+		font-size: 23px;
+		color: #ddd;
+		cursor: pointer;
+	}
+
+	.iconClearSearch:hover {
+		color: #bbb;
+	}
+</style>
+
+<div id="app" class="pageContent" style="display:none">
+
+	<h3>Showcase: Page State</h3>
+
+	<div v-show="records.length > 0 && pageStatus == 'ready'">
+
+		<div class="area_search">
+			<input class="searchText form-control-sm pull-left" autofocus v-model="pageState.searchText"
+				v-on:keyup="searchTextChanged()" /> <i v-show="pageState.searchText" @click="clearSearchField()"
+				class="fa fa-times pull-left iconClearSearch"></i>
+			<div class="clear"></div>
+		</div>
+
+		<div class="area_data">
+			<div class="dataSupertitle"><span class="showInfo" @click="toggleShowInfo()">Show Info</span> | <span
+					class="sortTitle">{{sortTitle}}</span></div>
+			<table class="data table-bordered table-striped">
+				<thead>
+					<tr>
+						<th class="column_id" @click="changeSortColumn('id')">ID <i
+								class="fa fa-chevron-down columnDirectionMarker" v-if="pageState.sortColumn == 'id'">
+						</th>
+						<th class="column_firstName" @click="changeSortColumn('firstName')">First Name <i
+								class="fa fa-chevron-down columnDirectionMarker"
+								v-if="pageState.sortColumn == 'firstName'">
+						</th>
+						<th class="column_lastName" @click="changeSortColumn('lastName')">Last Name <i
+								class="fa fa-chevron-down columnDirectionMarker"
+								v-if="pageState.sortColumn == 'lastName'">
+						</th>
+						<th class="column_status" @click="changeSortColumn('status')">Status <i
+								class="fa fa-chevron-down columnDirectionMarker"
+								v-if="pageState.sortColumn == 'status'">
+						</th>
+						<th v-show="userIsDeveloper"></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-for="item in show_records" v-show="recordShouldBeShown(item)">
+						<td class="column_id">{{item.id}}</td>
+						<td>{{item.firstName}}</td>
+						<td>{{item.lastName}}</td>
+						<td>{{item.status}}</td>
+						<td v-show="userIsDeveloper"><i class="fa fa-pencil manageIcon" v-on:click.stop
+								@click="manage_edit(item)"></i></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<div class="area_info" v-show="pageState.infoAreaStatus == 'showing'">
+			This is the information, e.g. some explanatory text about the data on the left.
+		</div>
+
+		<div class="clear"></div>
+
+	</div>
+
+	<div class="debugArea">
+		<div>searchText: [{{pageState.searchText}}]</div>
+		<div>infoAreaStatus: [{{pageState.infoAreaStatus}}]</div>
+		<div>sortColumn: [{{pageState.sortColumn}}]</div>
+		<div>sortTitle: [{{sortTitle}}]</div>
+	</div>
+
+	<div v-show="records.length == 0 && pageStatus == 'ready'">
+		No records.
+	</div>
+
+	<div v-show="pageStatus == 'busy'"><i class="fa fa-spinner fa-pulse page_loading_spinner" aria-hidden="true"></i>
+	</div>
+
+</div>
+
+<script>
+	const app = new Vue({
+		el: '#app',
+		data: {
+			pageState: {
+				searchText: '',
+				infoAreaStatus: '',
+				sortColumn: ''
+			},
+			sortTitle: '',
+			pageStatus: 'ready',
+			records: [],
+			show_records: [],
+			userIsDeveloper: false
+		},
+		methods: {
+			getDefaultPageState: function () {
+				return {
+					searchText: '',
+					infoAreaStatus: 'hidden',
+					sortColumn: 'lastName'
+				};
+			},
+			initialize: function () {
+				this.pageState = this.getDefaultPageState();
+				this.fadePageInNicely();
+				this.loadPageData();
+			},
+			loadPageData: function () {
+				this.pageStatus = 'busy';
+				const that = this;
+				axios({
+					method: 'post',
+					url: 'controllerShowcasePageState',
+					data: {
+						action: 'loadPageData'
+					}
+				}).then(function (responseObject) {
+					const response = qsys.getResponse(responseObject);
+					that.records = response.data.records;
+					that.userIsDeveloper = response.data.userIsDeveloper;
+					that.pageStatus = 'ready';
+					that.managePageState();
+					that.focusSearch();
+				}).catch(function (error) {
+					that.pageStatus = 'failed';
+				});
+			},
+			fadePageInNicely: function () {
+				$("#app").fadeIn(100);
+			},
+			managePageState: function () {
+				this.overridePageStateWithUrlState();
+				this.processPageState();
+				this.refreshUrlFromPageState();
+			},
+			overridePageStateWithUrlState: function () {
+				const url_searchText = qsys.getParameterValueFromUrl('searchText');
+				if (!qstr.isEmpty(url_searchText)) {
+					this.pageState.searchText = url_searchText;
+				}
+				const url_infoAreaStatus = qsys.getParameterValueFromUrl('infoAreaStatus');
+				if (!qstr.isEmpty(url_infoAreaStatus)) {
+					this.pageState.infoAreaStatus = url_infoAreaStatus;
+				}
+				const url_sortColumn = qsys.getParameterValueFromUrl('sortColumn');
+				if (!qstr.isEmpty(url_sortColumn)) {
+					this.pageState.sortColumn = url_sortColumn;
+				}
+			},
+			processPageState: function () {
+
+				//sort column
+				let niceColumnName = '';
+				switch (this.pageState.sortColumn) {
+					case 'id':
+						niceColumnName = 'ID';
+						break;
+					case 'firstName':
+						niceColumnName = 'First Name';
+						break;
+					case 'lastName':
+						niceColumnName = 'Last Name';
+						break;
+					case 'status':
+						niceColumnName = 'Status';
+						break;
+				}
+				this.sortTitle = 'Sorted by ' + niceColumnName;
+				this.show_records = qarr.multisort(this.records, [this.pageState.sortColumn], ['asc']);
+				this.$forceUpdate();
+
+			},
+			refreshUrlFromPageState: function () {
+				qsys.changeUrl('showcasePageState', this.pageState, { defaultParams: this.getDefaultPageState() });
+			},
+			recordShouldBeShown: function (item) {
+				if (qstr.isEmpty(this.pageState.searchText)) {
+					return true;
+				}
+				return qstr.contains(item.firstName, this.pageState.searchText) ||
+					qstr.contains(item.lastName, this.pageState.searchText) ||
+					qstr.contains(item.status, this.pageState.searchText);
+			},
+			searchTextChanged: function () {
+				this.refreshUrlFromPageState();
+			},
+			changeSortColumn: function (sortColumn) {
+				this.pageState.sortColumn = sortColumn;
+				this.processPageState();
+				this.refreshUrlFromPageState();
+			},
+			toggleShowInfo: function () {
+				this.pageState.infoAreaStatus = this.pageState.infoAreaStatus == 'hidden' ? 'showing' : 'hidden';
+				this.processPageState();
+				this.refreshUrlFromPageState();
+			},
+			manage_edit: function (item) {
+				if (this.notBusy()) {
+					const targetUrl = this.buildManageItemUrl('edit', item.id);
+					qsys.gotoPage(targetUrl);
+				}
+			},
+			notBusy() {
+				return this.pageStatus != 'busy';
+			},
+			buildManageItemUrl(command, id) {
+				const returnUrl = qsys.getPageAndParametersFromUrl('showcasePageState');
+				const encodedReturnUrl = qsys.encodeForUrlPassing(returnUrl);
+				const targetUrl =
+					`manageShowcaseUser?returnUrl=${encodedReturnUrl}&command=${command}&id=${id}`;
+				return targetUrl;
+			},
+			clearSearchField: function () {
+				this.pageState.searchText = '';
+				this.processPageState();
+				this.refreshUrlFromPageState();
+				this.focusSearch();
+			},
+			focusSearch: function () {
+				setTimeout(function () {
+					$('.searchText').focus();
+				}, 50);
+			}
+		}
+	});
+	app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

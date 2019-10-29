@@ -1,0 +1,26 @@
+<resources ver="3.3.0000">
+    <res key="banner">
+        <de>Um unsere Website für Sie optimal zu gestalten und fortlaufend verbessern zu können, verwenden wir Cookies.</de>
+        <en>We use cookies in order to optimise our website for you and to be able to continuously improve it. By continuing to use the website, you agree to the use of cookies.</en>
+    </res>
+    <res key="activateUser">
+        <de>Benutzer freischalten</de>
+        <en>Activate User</en>
+    </res>
+    <res key="addCustomPage">
+        <de>Neue benutzerdefinierte Seite hinzufügen</de>
+        <en>Add New User-Defined Page</en>
+    </res>
+    <res key="addCustomPagePrivacyPolicy">
+        <de>Datenschutzrichtlinie hinzufügen</de>
+        <en>Add Privacy Policy</en>
+    </res>
+    <res key="addNewTreeTable">
+        <de>Neue Liste</de>
+        <en>New List</en>
+    </res>
+    <res key="addPermission">
+        <de>Berechtigung hinzufügen</de>
+        <en>Add Permission</en>
+    </res>
+</resources>

@@ -1,0 +1,600 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,bootbox,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+<style>
+    .viewPortArea_computer {
+        float: right;
+        font-size: 15px;
+        color: #aaa;
+    }
+
+    .viewPortArea_smartphone {
+        font-size: 12px;
+        color: brown;
+        margin: -7px 0 0 0;
+    }
+
+    .manageIcon {
+        display: inline-block;
+        margin: 0 8px 0 0;
+    }
+
+    td.manageIconArea_enabled {
+        padding: 5px 10px;
+        cursor: pointer;
+        color: #555;
+    }
+
+    td.manageIconArea_disabled {
+        padding: 5px 10px;
+        color: #ccc;
+        cursor: default;
+    }
+
+
+    /* smartphone */
+    @media (max-width: 767px) {
+        td.manageIconArea {
+            width: 119px;
+        }
+    }
+
+    /* computer */
+    @media (min-width: 768px) {
+        td.manageIconArea {
+            width: 176px;
+        }
+    }
+
+    .addItem {
+        text-decoration: underline;
+        color: #555;
+        cursor: pointer;
+    }
+	.manageIconSpecial {
+		color: brown !important;
+	}
+
+	.textblockArea {
+		background-color: beige !important;
+		height: 300px !important;
+	}
+
+	.textblockTitle {
+		color: brown;
+	}
+
+	.textblockTitle a {
+		color: brown !important;
+	}	
+</style>
+
+<div id="app">
+    <h3>Manage Item Types</h3>
+    <div id="area_loaded" v-show="status=='ready'">
+        <div class="itemTypeManagementArea">
+            <div class="infoBox">
+                <input class="form-control searchBox pull-left" v-show="thereAreSomeRecords()"
+					v-model="pageState.searchText"
+					:disabled="!someColumnsAreActive() || pageStatus == 'busy' || !thereAreSomeRecords()"
+					v-on:keyup="filterItems()" placeholder="search" /> <i v-show="pageState.searchText"
+					@click="clearSearchField()" class="fa fa-times pull-left iconClearSearch"></i>
+				<div class="clear"></div>
+                <ul>
+                    <li v-show="thereAreSomeRecords()">Columns: <span v-for="(item,idCode,index) in fields"><span
+                                @click="toggleColumnActive(item)" :class="[item.visible ? 'columnShowing' : 'columnHidden']"
+                                class="prohibitSelectionClickable">{{item.label}}</span><span v-if="index < numberOfFields()-1"
+                                class="prohibitSelectionClickable">, </span></span>
+                    </li>
+                    <li v-show="thereAreSomeRecords()" v-if="filteredItemTypes.length == allItemTypes.length">
+                        Showing <span class="allItemsShown">ALL
+                            {{allItemTypes.length}}</span> item types.</li>
+                    <li v-show="!thereAreSomeRecords()">There are currently no item types.</li>
+                    <li v-if="filteredItemTypes.length != allItemTypes.length">Showing
+                        {{filteredItemTypes.length}} of {{allItemTypes.length}} item types.</li>
+
+                    <li v-show="!thereAreSomeRecords()">
+                        <span @click="manage_add()" class="addItem">Add Item Type</span> or add multiple items in <a
+                            href="batchImport">Batch Import</a>.
+                    </li>
+                </ul>
+
+            </div>
+            <table v-show="thereAreSomeRecords()" class="table table-sm smartTable">
+                <thead>
+                    <tr>
+<th class="dataType dataTypeId prohibitSelectionClickable" v-show="fields.id.visible"
+        @click="advanceSortSetting(fields.id)">ID<span class="softSpace">&nbsp;</span><span v-if="pageState.sortFieldIdCode == 'id'"><i
+                class="fa fa-chevron-up columnDirectionMarker" v-if="pageState.sortFieldDirection == 'desc'"></i><i
+                class="fa fa-chevron-down columnDirectionMarker" v-if="pageState.sortFieldDirection == 'asc'"></i></span></th>
+<th class="dataType dataTypeLine prohibitSelectionClickable" v-show="fields.idCode.visible"
+        @click="advanceSortSetting(fields.idCode)">idCode<span v-if="pageState.sortFieldIdCode == 'idCode'">&nbsp;<i
+                class="fa fa-chevron-up columnDirectionMarker" v-if="pageState.sortFieldDirection == 'desc'"></i><i
+                class="fa fa-chevron-down columnDirectionMarker" v-if="pageState.sortFieldDirection == 'asc'"></i></span></th>
+<th class="dataType dataTypeLine prohibitSelectionClickable" v-show="fields.title.visible"
+        @click="advanceSortSetting(fields.title)">Title<span v-if="pageState.sortFieldIdCode == 'title'">&nbsp;<i
+                class="fa fa-chevron-up columnDirectionMarker" v-if="pageState.sortFieldDirection == 'desc'"></i><i
+                class="fa fa-chevron-down columnDirectionMarker" v-if="pageState.sortFieldDirection == 'asc'"></i></span></th>
+<th class="dataType dataTypeParagraph prohibitSelectionClickable" v-show="fields.description.visible"
+        @click="advanceSortSetting(fields.description)">Description<span v-if="pageState.sortFieldIdCode == 'description'">&nbsp;<i
+                class="fa fa-chevron-up columnDirectionMarker" v-if="pageState.sortFieldDirection == 'desc'"></i><i
+                class="fa fa-chevron-down columnDirectionMarker" v-if="pageState.sortFieldDirection == 'asc'"></i></span></th>
+<th class="dataType dataTypeLine prohibitSelectionClickable" v-show="fields.kind.visible"
+        @click="advanceSortSetting(fields.kind)">Kind<span v-if="pageState.sortFieldIdCode == 'kind'">&nbsp;<i
+                class="fa fa-chevron-up columnDirectionMarker" v-if="pageState.sortFieldDirection == 'desc'"></i><i
+                class="fa fa-chevron-down columnDirectionMarker" v-if="pageState.sortFieldDirection == 'asc'"></i></span></th>
+<th class="dataType dataTypeLine prohibitSelectionClickable" v-show="fields.subsite.visible"
+        @click="advanceSortSetting(fields.subsite)">Subsite<span v-if="pageState.sortFieldIdCode == 'subsite'">&nbsp;<i
+                class="fa fa-chevron-up columnDirectionMarker" v-if="pageState.sortFieldDirection == 'desc'"></i><i
+                class="fa fa-chevron-down columnDirectionMarker" v-if="pageState.sortFieldDirection == 'asc'"></i></span></th>
+<th class="dataType dataTypeWholeNumber prohibitSelectionClickable" v-show="fields.displayOrder.visible"
+        @click="advanceSortSetting(fields.displayOrder)">Display Order<span v-if="pageState.sortFieldIdCode == 'displayOrder'">&nbsp;<i
+                class="fa fa-chevron-up columnDirectionMarker" v-if="pageState.sortFieldDirection == 'desc'"></i><i
+                class="fa fa-chevron-down columnDirectionMarker" v-if="pageState.sortFieldDirection == 'asc'"></i></span></th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+					<template v-for="item in filteredItemTypes">
+						<tr>
+<td class="dataTypeId" v-show="fields.id.visible">{{item.id}}</td>
+<td class="dataTypeLine" v-show="fields.idCode.visible">{{item.idCode}}</td>
+<td class="dataTypeLine" v-show="fields.title.visible">{{item.title}}</td>
+<td class="dataTypeParagraph" v-show="fields.description.visible">{{item.description}}</td>
+<td class="dataTypeLine" v-show="fields.kind.visible">{{item.kind}}</td>
+<td class="dataTypeLine" v-show="fields.subsite.visible">{{item.subsite}}</td>
+<td class="dataTypeWholeNumber" v-show="fields.displayOrder.visible">{{item.displayOrder}}</td>
+
+							<td :class="{manageIconArea_enabled: pageStatus != 'busy', manageIconArea_disabled: pageStatus == 'busy'}"
+								class="manageIconArea">
+									<i class="fa fa-pencil manageIcon prohibitSelectionClickable" @click="manage_edit(item)"
+										title="edit"></i>
+									<i class="fa fa-plus manageIcon prohibitSelectionClickable" @click="manage_add(item)"
+										title="add"></i>
+									<i class="fa fa-clone manageIcon prohibitSelectionClickable" @click="manage_copy(item)"
+										title="copy"></i>
+									<i class="fa fa-trash-o manageIcon prohibitSelectionClickable"
+										@click="manage_delete(item)" title="delete"></i>
+									<i class="fa fa-pencil-square-o manageIcon manageIconSpecial prohibitSelectionClickable"
+										@click="manage_displayItemTextBlockForEditing(item)"
+										title="text block to EDIT item"></i>
+									<i class="fa fa-plus-square-o manageIcon manageIconSpecial prohibitSelectionClickable"
+										@click="manage_displayItemTextBlockForAdding(item)"
+										title="text block to ADD item"></i>
+							</td>
+						</tr>
+						<tr v-if="item.textblockToUpdateItemStatus == 'show'">
+							<td colspan="6">
+								<div class="textblockTitle"><b>Textblock for EDITING</b>: copy, change, paste back into
+									<a href="batchImport">Batch Import</a></div>
+								<textarea class="form-control textblockArea"
+									readonly>{{item.textblockToUpdateItem}}</textarea>
+							</td>
+						</tr>
+						<tr v-if="item.textblockToAddItemStatus == 'show'">
+							<td colspan="6">
+								<div class="textblockTitle"><b>Textblock for ADDING</b>: copy, fill in fields, paste
+									back
+									into
+									<a href="batchImport">Batch Import</a></div>
+								<textarea class="form-control textblockArea"
+									readonly>{{item.textblockToAddItem}}</textarea>
+							</td>
+						</tr>
+					</template>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    <div id="area_loading" v-show="status=='loading'">
+        <i class="fa fa-spinner fa-pulse page_loading_spinner" aria-hidden="true"></i>
+    </div>
+
+</div>
+
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            status: 'ready',
+            allItemTypes: [],
+            filteredItemTypes: [],
+            fields: {
+                id: {
+            idCode: 'id',
+            label: 'ID',
+            visible: false,
+            sort: 'none'
+        },
+                idCode: {
+            idCode: 'idCode',
+            label: 'idCode',
+            visible: false,
+            sort: 'none'
+        },
+                title: {
+            idCode: 'title',
+            label: 'Title',
+            visible: false,
+            sort: 'none'
+        },
+                description: {
+            idCode: 'description',
+            label: 'Description',
+            visible: false,
+            sort: 'none'
+        },
+                kind: {
+            idCode: 'kind',
+            label: 'Kind',
+            visible: false,
+            sort: 'none'
+        },
+                subsite: {
+            idCode: 'subsite',
+            label: 'Subsite',
+            visible: false,
+            sort: 'none'
+        },
+                displayOrder: {
+            idCode: 'displayOrder',
+            label: 'Display Order',
+            visible: false,
+            sort: 'none'
+        }
+            },
+            viewport: {
+                height: 0,
+                width: 0,
+                device: '',
+                previousDevice: ''
+            },
+            pageStatus: 'busy',
+            pageState: {
+                visibleFieldList: '',
+                searchText: '',
+                sortFieldIdCode: '',
+                sortFieldDirection: ''
+            },
+            computerViewVisibleFieldList: ''
+        },
+        created() {
+            window.addEventListener("resize", this.recalculateViewportSizes);
+        },
+        destroyed() {
+            window.removeEventListener("resize", this.recalculateViewportSizes);
+        },
+        methods: {
+            getComputerPageState: function () {
+                return {
+                    visibleFieldList: 'idCode,title,description,kind,subsite,displayOrder',
+                    searchText: '',
+                    sortFieldIdCode: 'idCode',
+                    sortFieldDirection: 'asc'
+                };
+            },
+            getSmartphonePageState: function () {
+                return {
+                    visibleFieldList: 'idCode',
+                    searchText: '',
+                    sortFieldIdCode: 'idCode',
+                    sortFieldDirection: 'asc'
+                };
+            },
+            setDefaultPageState: function () {
+                if (this.viewport.device == 'computer') {
+                    this.pageState = this.getComputerPageState();
+                } else {
+                    this.pageState = this.getSmartphonePageState();
+                    this.computerViewVisibleFieldList = 'idCode,title,description,kind,subsite,displayOrder';
+                }
+            },            
+            initialize: function () {
+                this.determineViewPort();
+                this.setDefaultPageState();
+                this.overridePageStateWithUrlState();
+                this.loadData();
+
+                // force initial view
+                if (this.viewport.device == 'smartphone') {
+                    this.setViewportToSmartphone();
+                } else {
+                    this.setViewportToComputer();
+                }
+
+                this.pageStatus = 'ready';
+                this.refreshUrlFromPageState();
+            },
+            overridePageStateWithUrlState: function () {
+                const url_visibleFieldList = qsys.getParameterValueFromUrl('visibleFieldList');
+                const url_searchText = qsys.getParameterValueFromUrl('searchText');
+                const url_sortFieldIdCode = qsys.getParameterValueFromUrl('sortFieldIdCode');
+                const url_sortFieldDirection = qsys.getParameterValueFromUrl('sortFieldDirection');
+                if (!qstr.isEmpty(url_visibleFieldList)) {
+                    this.pageState.visibleFieldList = url_visibleFieldList;
+                }
+                if (!qstr.isEmpty(url_searchText)) {
+                    this.pageState.searchText = url_searchText;
+                }
+                if (!qstr.isEmpty(url_sortFieldIdCode)) {
+                    this.pageState.sortFieldIdCode = url_sortFieldIdCode;
+                }
+                if (!qstr.isEmpty(url_sortFieldDirection)) {
+                    this.pageState.sortFieldDirection = url_sortFieldDirection;
+                }
+                this.transferPageStateToFields();
+            },
+            transferPageStateToFields: function () {
+                for (fieldIdCode in this.fields) {
+                    const field = this.fields[fieldIdCode];
+                    if (qstr.listContainsValue(this.pageState.visibleFieldList, fieldIdCode)) {
+                        field.visible = true;
+                    } else {
+                        field.visible = false;
+                    }
+                    if (this.pageState.sortFieldIdCode == fieldIdCode) {
+                        field.sort = this.pageState.sortFieldDirection;
+                    } else {
+                        field.sort = 'none';
+                    }
+                }
+            },
+            transferFieldsToPageState: function () {
+                const visibleFields = [];
+                for (fieldIdCode in this.fields) {
+                    const field = this.fields[fieldIdCode];
+                    if (field.visible) {
+                        visibleFields.push(fieldIdCode);
+                    }
+                    if (field.sort != 'none') {
+                        this.pageState.sortFieldIdCode = fieldIdCode;
+                        this.pageState.sortFieldDirection = field.sort;
+                    }
+                }
+                this.pageState.visibleFieldList = visibleFields.join(',');
+            },
+            loadData: function () {
+                this.status = 'loading';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'controllerManageItemTypes',
+                    data: {
+                        action: 'loadPageData'
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    that.allItemTypes = response.data.itemTypes;
+                    that.filterItems();
+                    that.focusSearch();
+
+					for (const itemType of that.allItemTypes) {
+						itemType.textblockToUpdateItemStatus = 'hide';
+						itemType.textblockToAddItemStatus = 'hide';
+					}
+
+                    that.status = 'ready';
+                }).catch(function (error) {
+                    that.status = 'failed';
+                });
+            },
+            focusSearch: function () {
+                setTimeout(function () {
+                    $('.searchBox').focus();
+                }, 50);
+            },
+            toggleColumnActive: function (field) {
+                field.visible = !field.visible;
+                this.filterItems();
+                this.transferFieldsToPageState();
+                this.refreshUrlFromPageState();
+            },
+            filterItems: function () {
+                const sortedField = this.getCurrentSortField();
+                this.filteredItemTypes = qarr.multisort(this.allItemTypes.filter(item => this.includeInSearchFilter(
+                    item)), [sortedField.idCode], [sortedField.sort]);
+                this.refreshUrlFromPageState();
+            },
+            someColumnsAreActive: function () {
+                for (fieldIdCode in this.fields) {
+                    const field = this.fields[fieldIdCode];
+                    if (field.visible) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            includeInSearchFilter: function (item) {
+                const parts = qstr.breakIntoParts(this.pageState.searchText, ' ');
+                for (part of parts) {
+                    let foundInPart = false;
+                    for (fieldIdCode in this.fields) {
+                        const field = this.fields[fieldIdCode];
+                        const value = String(item[fieldIdCode]);
+                        if (value.toUpperCase().includes(part.toUpperCase())) {
+                            foundInPart = true;
+                        }
+                    }
+                    if (!foundInPart) {
+                        return false;
+                    }
+                }
+                return true;
+            },
+            numberOfFields: function () {
+                return qobj.getObjectLength(this.fields);
+            },
+            getCurrentSortField: function () {
+                for (const key in this.fields) {
+                    const field = this.fields[key];
+                    if (field.sort != 'none') {
+                        return field;
+                    }
+                }
+                return null;
+            },
+            resetSortOnAllFields: function () {
+                for (const key in this.fields) {
+                    const field = this.fields[key];
+                    field.sort = 'none';
+                }
+            },
+            userClickedCurrentSortedField: function (clickedField) {
+                const currentSortField = this.getCurrentSortField();
+                return currentSortField.idCode == clickedField.idCode;
+            },
+            advanceSortSetting: function (field) {
+                if (this.userClickedCurrentSortedField(field)) {
+                    if (field.sort == 'asc') {
+                        field.sort = 'desc';
+                    } else {
+                        field.sort = 'asc';
+                    }
+                } else {
+                    this.resetSortOnAllFields();
+                    field.sort = 'asc';
+                }
+                this.sortFieldIdCode = field.idCode;
+                this.sortFieldDirection = field.sort;
+                this.filterItems();
+                this.transferFieldsToPageState();
+                this.refreshUrlFromPageState();
+            },
+            setFieldSort: function (fieldIdCode, fieldSort) {
+                const field = this.fields[fieldIdCode];
+                this.resetSortOnAllFields();
+                field.sort = fieldSort;
+                this.pageState.sortFieldIdCode = fieldIdCode;
+                this.pageState.sortFieldDirection = fieldSort;
+            },
+            determineViewPort() {
+                this.viewport.width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+                this.viewport.height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+                this.viewport.device = this.viewport.width > 768 ? 'computer' : 'smartphone';
+            },
+            recalculateViewportSizes(e) {
+                this.determineViewPort();
+                if (this.viewport.previousDevice == 'computer' && this.viewport.device == 'smartphone') {
+                    this.computerViewVisibleFieldList = this.pageState.visibleFieldList;
+                    this.setViewportToSmartphone();
+                }
+                if (this.viewport.previousDevice == 'smartphone' && this.viewport.device == 'computer') {
+                    this.pageState.visibleFieldList = this.computerViewVisibleFieldList;
+                    this.setViewportToComputer();
+                }
+                this.viewport.previousDevice = this.viewport.device;
+            },
+            setViewportToSmartphone() {
+                this.pageState = this.getSmartphonePageState();
+                this.transferPageStateToFields();
+                this.refreshUrlFromPageState();
+            },
+            setViewportToComputer() {
+                this.transferPageStateToFields();
+                this.refreshUrlFromPageState();
+            },
+            notBusy() {
+                return this.pageStatus != 'busy';
+            },
+            buildManageItemUrl(command, id) {
+                const returnUrl = qsys.getPageAndParametersFromUrl('manageItemTypes');
+                const encodedReturnUrl = qsys.encodeForUrlPassing(returnUrl);
+                const targetUrl =
+                    `manageItemType?returnUrl=${encodedReturnUrl}&command=${command}&id=${id}`;
+                return targetUrl;
+            },
+            manage_edit(item) {
+                if (this.notBusy()) {
+                    const targetUrl = this.buildManageItemUrl('edit', item.id);
+                    qsys.gotoPage(targetUrl);
+                }
+            },
+            manage_add(item = null) {
+                if (this.notBusy()) {
+                    let id = 0;
+                    if (item != null) {
+                        id = item.id;
+                    }
+                    const targetUrl = this.buildManageItemUrl('add', id);
+                    qsys.gotoPage(targetUrl);
+                }
+            },
+            manage_copy(item) {
+                if (this.notBusy()) {
+                    const targetUrl = this.buildManageItemUrl('copy', item.id);
+                    qsys.gotoPage(targetUrl);
+                }
+            },
+            manage_delete(item) {
+                if (this.notBusy()) {
+                    const that = this;
+                    bootbox.confirm({
+                        size: "small",
+                        message: `Are you sure you want to delete <b>${item.title}</b>?`,
+                        callback: function (confirmed) {
+                            if (confirmed) {
+                                that.pageStatus = 'busy';
+                                axios({
+                                    method: 'post',
+                                    url: 'controllerManageItemTypes',
+                                    data: {
+                                        action: 'deleteItem',
+                                        item: item
+                                    }
+                                }).then(function (responseObject) {
+                                    const response = qsys.getResponse(responseObject);
+                                    that.allItemTypes = that.allItemTypes.filter(
+                                        function (innerItem) {
+                                            return innerItem.id != item.id
+                                        })
+                                    that.filterItems();
+                                    that.focusSearch();
+                                    that.pageStatus = 'ready';
+                                }).catch(function (error) {
+                                    console.log(error)
+                                });
+                            }
+                        }
+                    });
+                }
+            },
+            thereAreSomeRecords: function () {
+                return this.allItemTypes.length > 0;
+            },
+            refreshUrlFromPageState: function () {
+                qsys.changeUrl('manageItemTypes', this.pageState);
+            },
+            buildVisibleFieldList: function () {
+                const fieldIdCodes = [];
+                for (fieldIdCode in this.fields) {
+                    const field = this.fields[fieldIdCode];
+                    if (field.visible) {
+                        fieldIdCodes.push(fieldIdCode);
+                    }
+                }
+                return fieldIdCodes.join(',');
+            }, 
+			manage_displayItemTextBlockForEditing: function (item) {
+				item.textblockToUpdateItemStatus = item.textblockToUpdateItemStatus == 'hide' ? 'show' : 'hide';
+				item.textblockToAddItemStatus = 'hide';
+				this.$forceUpdate();
+			}, 
+			manage_displayItemTextBlockForAdding: function (item) {
+				item.textblockToAddItemStatus = item.textblockToAddItemStatus == 'hide' ? 'show' : 'hide';
+				item.textblockToUpdateItemStatus = 'hide';
+				this.$forceUpdate();
+			}, 
+			clearSearchField: function () {
+				this.pageState.searchText = '';
+				this.filterItems();
+				this.focusSearch();
+			}
+        }
+    });
+    app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

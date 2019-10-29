@@ -1,0 +1,59 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+<style>
+	.message {
+		background-color: #f3f3f3;
+		margin: 0 0 5px 0;
+	}
+</style>
+
+<div id="app" class="pageContent">
+
+	<h3>Showcase: ES6 map(), filter(), reduce(), find() functions</h3>
+
+	<div class="message" v-for="message in messages">{{message}}&nbsp;</div>
+
+
+	<div v-show="pageStatus == 'busy'"><i class="fa fa-spinner fa-pulse page_loading_spinner" aria-hidden="true"></i>
+	</div>
+
+</div>
+
+<script>
+	const app = new Vue({
+		el: '#app',
+		data: {
+			pageStatus: 'ready',
+			messages: []
+		},
+		methods: {
+			initialize: function () {
+				$('.bodyContent').show();
+				this.loadPageData();
+			},
+			loadPageData: function () {
+				this.pageStatus = 'busy';
+				const that = this;
+				axios({
+					method: 'post',
+					url: 'controllerShowcaseES6MapFunction',
+					data: {
+						action: 'loadPageData'
+					}
+				}).then(function (responseObject) {
+					const response = qsys.getResponse(responseObject);
+					that.messages = response.data.messages;
+					that.pageStatus = 'ready';
+				}).catch(function (error) {
+					that.pageStatus = 'failed';
+				});
+			}
+		}
+	});
+	app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

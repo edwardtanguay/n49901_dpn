@@ -1,0 +1,104 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+<style>
+	.page_loading_spinner {
+		margin-top: 10px;
+	}
+
+	.note {
+		margin: 0 0 20px 0;
+	}
+</style>
+
+<div id="app" style="display: none" class="pageContent">
+
+	<h3><i v-show="pageStatus == 'busy'" class="fa fa-spinner fa-pulse" aria-hidden="true"></i>
+		Showcase: Load Data from Multiple Sources</h3>
+
+	<div>Loaded: {{numberLoaded}}</div>
+
+</div>
+
+<script>
+	const app = new Vue({
+		el: '#app',
+		data: {
+			pageStatus: 'ready',
+			dataSources: [
+				{
+					action: 'getVerb',
+					data: {
+						verbName: 'ecrire'
+					},
+					verbObject: {},
+					processResponse: (obj, response) => {
+						obj.verbObject = response.data.verbObject;
+					}
+				},
+				{
+					action: 'getHeadlines',
+					headlines: [],
+					processResponse: () => {
+					}
+				},
+				{
+					action: 'getDirectoryInfo',
+					fileObjects: [],
+					processResponse: () => {
+					}
+				},
+				{
+					action: 'getPageItemInfo',
+					pageItems: [],
+					processResponse: () => {
+					}
+				},
+				{
+					action: 'getExcelData',
+					flashcards: [],
+					processResponse: () => {
+					}
+				}
+			],
+			actions: [],
+			numberLoaded: 0,
+			verbObject: {}
+		},
+		methods: {
+			initialize: function () {
+				$('.pageContent').fadeIn(100);
+				const promises = [];
+				for (dataSource of this.dataSources) {
+					promises.push(this.loadDataSource(dataSource));
+				}
+				Promise.all(promises);
+
+			},
+			loadDataSource: function (dataSource) {
+				this.pageStatus = 'busy';
+				return axios({
+					method: 'post',
+					url: 'controllerShowcaseLoadFromMultipleDataSources',
+					data: {
+						action: dataSource.action
+					}
+				}).then(responseObject => {
+					const response = qsys.getResponse(responseObject);
+					this.numberLoaded++;
+					if (this.numberLoaded >= this.dataSources.length) {
+						this.pageStatus = 'ready';
+					}
+					dataSource.processResponse(this, response);
+				}).catch(function (error) {
+					this.pageStatus = 'failed';
+				});
+			},
+		}
+	});
+	app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

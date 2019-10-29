@@ -1,0 +1,63 @@
+<%
+//DYNAMIC_VARIABLE:extensions=jquery,bootstrap,vuejs,axios,lodash,fontawesome
+%>
+<%- include(data.system_layout_header)  %>
+
+        <p>
+            <i class="fa fa-check text-success" aria-hidden="true"></i> Font Awesome ready</p>
+        <p>
+            <i class="fa fa-check text-success" aria-hidden="true"></i>
+            <span class="text-success">Bootstrap ready</span>
+        </p>
+        <p id="jqueryTest"></p>
+        <div id="app">
+            <div id="appContent">
+                <p>
+                    <i class="fa fa-check text-success" aria-hidden="true"></i> Lodash ready: {{lodashMessage}}</p>
+                <p>
+                    <i class="fa fa-check text-success" aria-hidden="true"></i> {{message}}</p>
+
+                <p v-show="ajaxStatus=='loaded'">
+                    <i class="fa fa-check text-success" aria-hidden="true"></i> {{ajaxMessage}}</p>
+                <p v-show="ajaxStatus!='loaded'">
+                    <i class="fa fa-check text-danger" aria-hidden="true"></i> axios failed</p>
+            </div>
+        </div>
+
+
+        <script>
+            $(function () {
+                $("#jqueryTest").html('<i class="fa fa-check text-success" aria-hidden="true"></i> jQuery ready');
+            });
+
+            const app = new Vue({
+                el: '#app',
+                data: {
+                    message: 'Vue.js ready',
+                    ajaxMessage: '',
+                    ajaxStatus: 'unknown',
+                    lodashMessage: _.sortBy(_.union([6, 3, 7], [5, 4, 1, 2]))
+                },
+                methods: {
+                    getData: function () {
+                        this.status = 'loading';
+                        const that = this;
+                        axios({
+                            method: 'post',
+                            url: 'data',
+                            data: {
+                                name: 'Axios'
+                            }
+                        }).then(function (response) {
+                            that.ajaxStatus = 'loaded';
+                            that.ajaxMessage = response.data['message'];
+                        }).catch(function (error) {
+                            that.ajaxStatus = 'failed';
+                        });
+                    }
+                }
+            });
+            app.getData();
+        </script>
+
+<%- include(data.system_layout_footer)  %>

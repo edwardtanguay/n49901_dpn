@@ -1,0 +1,170 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+<div id="app">
+
+</div>
+
+<script>
+	const app = new Vue({
+		el: '#app',
+		data: {
+			clientSideEmptyFieldChecking: false,
+			pageStatus: 'ready',
+			formStatus: '',
+			formMessage: '',
+			fields: {
+				dummyInfo: {
+					label: '',
+					dataTypeIdCode: '',
+					value: '',
+					info: '',
+					example: '',
+					required: false,
+					errorStatus: '',
+					errorMessage: '',
+					displayStatus: '',
+					choices: '',
+					choiceSelector: ''
+				}
+			}
+		},
+		methods: {
+			initialize: function () {
+				$('.bodyContent').show();
+				$('.messageArea').show();
+				//this.loadPageData();
+				this.processForm();
+			},
+			loadPageData: function () {
+				this.pageStatus = 'busy';
+				const that = this;
+				axios({
+					method: 'post',
+					url: 'controllerLogout',
+					data: {
+						action: 'loadPageData'
+					}
+				}).then(function (responseObject) {
+					const response = qsys.getResponse(responseObject);
+					const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+					that.fields = response.data.fields;
+					that.focusField(formFocusedFieldIdCode);
+					that.pageStatus = 'ready';
+				}).catch(function (error) {
+					that.pageStatus = 'failed';
+				});
+			},
+			processForm: function () {
+				this.pageStatus = 'busy';
+				const that = this;
+				$('body').css('opacity', '.2');
+				axios({
+					method: 'post',
+					url: 'controllerLogout',
+					data: {
+						action: 'processForm',
+						fields: that.fields
+					}
+				}).then(function (responseObject) {
+					qsys.gotoPage('home');
+					const response = qsys.getResponse(responseObject);
+					// const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+					// that.formStatus = response.formStatus;
+					// that.formMessage = response.formMessage;
+					// that.fields = response.data.fields;
+					// that.focusField(formFocusedFieldIdCode);
+					// that.pageStatus = 'ready';
+
+					that.loggedOutUserId = response.data.loggedOutUserId;
+					//$(location).attr('href', 'http://stackoverflow.com')
+					//alert(that.loggedOutUserId);
+					that.status = 'ready';
+				}).catch(function (error) {
+					that.formMessageKind = 'error';
+					that.formMessage = 'An unknown error occurred.';
+				});
+			},
+			onEnterClick: function () {
+				$('#buttonSubmit').click();
+			},
+			qstr_isEmpty: function (line) {
+				return qstr.isEmpty(line);
+			},
+			formSubmitButtonShouldBeDisabled: function () {
+				if (!this.clientSideEmptyFieldChecking) {
+					return false;
+				}
+				if (this.pageStatus == 'busy') {
+					return true;
+				}
+				for (const key in this.fields) {
+					const field = this.fields[key];
+					if (field.required && qstr.isEmpty(field.value)) {
+						return true;
+					}
+				}
+				return false;
+			},
+			keyWasPressed: function (e) {
+
+				if (e.keyCode === 13 && e.ctrlKey) {
+					this.onEnterClick();
+				}
+
+				this.formSubmitButtonShouldBeDisabled();
+
+				let thereAreErrors = false;
+
+				//empty fields
+				for (const idCode in this.fields) {
+					const field = this.fields[idCode];
+					if (field.required && qstr.isEmpty(field.value)) {
+						this.setDataInFields(idCode, 'errorMessage', 'This value is required and cannot be empty.');
+						thereAreErrors = true;
+					} else {
+						this.setDataInFields(idCode, 'errorMessage', '');
+					}
+				}
+			},
+			focusField: function (fieldIdCode) {
+				setTimeout(function () {
+					$('#field_' + fieldIdCode).focus();
+				}, 50);
+			},
+			setDataInFields: function (idCode, property, value) {
+				const field = `${idCode}.${property}`;
+				_.set(this.fields, field, value)
+
+			},
+			thereAreRequiredFields: function () {
+				for (const idCode in this.fields) {
+					const field = this.fields[idCode];
+					if (field.required) {
+						return true;
+					}
+				}
+				return false;
+			},
+			switchChoiceSelector: function (field) {
+				switch (field.choiceSelector) {
+					case 'radioVertical':
+						field.choiceSelector = 'dropdown';
+						break;
+					case 'dropdown':
+						field.choiceSelector = 'radioHorizontal';
+						break;
+					case 'radioHorizontal':
+					default:
+						field.choiceSelector = 'radioVertical';
+						break;
+				}
+			}
+		}
+	});
+	app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

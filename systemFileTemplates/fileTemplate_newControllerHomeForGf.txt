@@ -1,0 +1,71 @@
+"use strict"
+const Controller = require('./controller');
+const DpDataLoader = require('../systemClasses/dpDataLoader');
+const qsys = require('../qtools/qsys');
+const qdev = require('../qtools/qdev');
+const qdat = require('../qtools/qdat');
+const qstr = require('../qtools/qstr');
+const dpod = require('../system/dpod');
+const System = require('../system/system');
+
+class ControllerHome extends Controller {
+	constructor(request, response) {
+		super(request, response);
+	}
+
+	action_loadPageData() {
+		const dpDataLoader = new DpDataLoader();
+		dpDataLoader.getRecordsWithSql('gfhowtoRecords', 'select * from gfhowtos');
+		dpDataLoader.getRecordsWithSql('gftaskRecords', 'select * from gftasks');
+		const that = this;
+		dpDataLoader.load(function (data) {
+
+			const searchDataitems = [];
+
+			// GFTASKS
+			const gftaskItemObjects = System.instantiateItemObjectsWithRecords('gftasks', data.gftaskRecords);
+			for (const gftask of gftaskItemObjects) {
+				const searchObject = {
+					id: gftask.id,
+					kind: 'Task',
+					title: gftask.title,
+					body: gftask.body,
+					whenCreated: gftask.systemWhenCreated,
+					niceDate: qdat.getShortMonthDay(gftask.systemWhenCreated),
+					permalinkUrl: gftask.getPermalinkUrl()
+				};
+				searchDataitems.push(searchObject)
+			}
+
+			// GFHOWTOS
+			const gfhowtoItemObjects = System.instantiateItemObjectsWithRecords('gfhowtos', data.gfhowtoRecords);
+			for (const gfhowto of gfhowtoItemObjects) {
+				const searchObject = {
+					id: gfhowto.id,
+					kind: 'Howto',
+					title: gfhowto.title,
+					body: gfhowto.body,
+					whenCreated: gfhowto.systemWhenCreated,
+					niceDate: qdat.getShortMonthDay(gfhowto.systemWhenCreated),
+					permalinkUrl: gfhowto.getPermalinkUrl()
+				};
+				searchDataitems.push(searchObject)
+			}
+
+
+			that.responseData.searchDataitems = searchDataitems;
+
+			//that.responseData.userIsCurrentlyLoggedIn = qsys.userIsCurrentlyLoggedIn(that.request);
+
+			qsys.currentUserData(that.request, function (userData) {
+				that.responseData.userData = userData;
+				that.sendResponse();
+			});
+		});
+	}
+
+
+
+}
+
+module.exports = ControllerHome

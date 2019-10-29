@@ -1,0 +1,325 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash,bootbox
+%>
+<%- include(data.system_layout_header)  %>
+
+<div id="app">
+
+    <div class="card smartFormCard">
+        <div class="card-header">
+            <div class="pull-left" :class="{areaLoading: pageStatus=='busy'}">Delete Item Type</div>
+            <div class="pull-right">
+                <i v-show="pageStatus!='ready'" class="pull-left fa fa-cog fa-spin waitSpinner"></i>
+            </div>
+        </div>
+        <div class="card-body smartFormBody" :class="{areaLoading: pageStatus=='busy'}">
+            <div class="messageArea" style="display:none">
+                <div v-show="formStatus=='success'" class="alert alert-success" v-html="formMessage"></div>
+                <div v-show="formStatus=='invalid'" class="alert alert-danger">
+                    <strong>Form is invalid:</strong> {{formMessage}}
+                </div>
+                <div v-show="formStatus=='error'" class="alert alert-danger">
+                    <strong>Error:</strong> <span v-html="formMessage"></span>
+                </div>
+            </div>
+            <div v-show="pageStatus!='busy'" class="bodyContent" style="display:none">
+
+                <!-- field: ITEM TYPE ID CODE -->
+                <dl class="dataType_choice">
+                    <dt><span v-if="fields.itemTypeIdCode.required">*</span>Item Type to Delete</dt>
+                    <dd>
+                        <div>
+                            <!--radioVertical-->
+                            <div v-if="fields.itemTypeIdCode.choiceSelector == 'radioVertical'"
+                                class="display_radioVertical">
+                                <ul>
+                                    <li v-for="choice in fields.itemTypeIdCode.choices">
+                                        <label class="prohibitSelectionClickable"
+                                            :class="{text_disabled: choice.disabled}"
+                                            v-on:keyup.enter="onEnterClick()"><input type="radio"
+                                                v-model="fields.itemTypeIdCode.value" :value="choice.idCode">
+                                            {{choice.label}}</label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!--radioHorizontal-->
+                            <div v-if="fields.itemTypeIdCode.choiceSelector == 'radioHorizontal'"
+                                class="display_radioHorizontal">
+                                <ul>
+                                    <li v-for="choice in fields.itemTypeIdCode.choices">
+                                        <label class="prohibitSelectionClickable"
+                                            v-on:keyup.enter="onEnterClick()"><input type="radio"
+                                                v-model="fields.itemTypeIdCode.value" :value="choice.idCode">
+                                            {{choice.label}}</label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!--dropdown-->
+                            <div v-if="fields.itemTypeIdCode.choiceSelector == 'dropdown'" class="display_dropdown">
+                                <select v-model="fields.itemTypeIdCode.value">
+                                    <option v-for="choice in fields.itemTypeIdCode.choices" :value="choice.idCode">
+                                        {{choice.label}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- field info, examples, and error messags -->
+                        <div>
+                            <small v-if="fields.itemTypeIdCode.errorMessage != ''"
+                                class="error">{{fields.itemTypeIdCode.errorMessage}}
+                            </small>
+                            <small v-if="fields.itemTypeIdCode.info" class="info">{{fields.itemTypeIdCode.info}}
+                            </small>
+                            <small v-if="fields.itemTypeIdCode.example" class="example"><span
+                                    class="exampleLabel">Example:</span> <span
+                                    class="exampleText">{{fields.itemTypeIdCode.example}}</span>
+                            </small>
+                        </div>
+                    </dd>
+                </dl>
+
+
+
+                <!-- form notes -->
+                <div class="pull-left formNotes">
+                    <span v-show="thereAreRequiredFields()" class="requiredFieldMarker">* required field</span>
+                </div>
+
+                <!-- submit button -->
+                <div class="pull-right">
+                    <button id="buttonSubmit" :disabled="formSubmitButtonShouldBeDisabled()" @click="processStep1()"
+                        class="btn btn-default formButton">Delete</button>
+                </div>
+            </div>
+            <div v-show="pageStatus=='busy'" class="bodyContent" style="display:none">
+                <div>{{processMessage}}</div>
+            </div>
+        </div>
+    </div>
+
+    <div v-show="pageStatus!='busy'" class="quickMenuArea">
+        >>> <a href="createItemType">Create Item Type</a>
+    </div>
+
+
+</div>
+
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            clientSideEmptyFieldChecking: false,
+            pageStatus: 'ready',
+            formStatus: '',
+            formMessage: '',
+            fields: {
+                itemTypeIdCode: {
+                    label: '',
+                    dataTypeIdCode: '',
+                    value: '',
+                    info: '',
+                    example: '',
+                    required: false,
+                    errorStatus: '',
+                    errorMessage: '',
+                    displayStatus: '',
+                    choices: '',
+                    choiceSelector: ''
+                }
+            },
+            processMessage: ''
+        },
+        methods: {
+            initialize: function () {
+                $('.bodyContent').show();
+                $('.messageArea').show();
+                this.loadPageData();
+            },
+            loadPageData: function () {
+                this.pageStatus = 'busy';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'controllerDeleteItemType',
+                    data: {
+                        action: 'loadPageData'
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+                    that.fields = response.data.fields;
+                    that.focusField(formFocusedFieldIdCode);
+                    that.pageStatus = 'ready';
+                }).catch(function (error) {
+                    that.pageStatus = 'failed';
+                });
+            },
+            processStep1: function () {
+                const that = this;
+                bootbox.confirm({
+                    size: "small",
+                    message: "Are you sure?",
+                    callback: function (confirmed) {
+                        if (confirmed) {
+                            that.confirmedProcessStep1();
+                        }
+                    }
+                });
+            },
+            confirmedProcessStep1: function () {
+                this.pageStatus = 'busy';
+                this.processMessage = 'STEP 1: Deleting "Manage Items" page...';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'controllerDeleteItemType',
+                    data: {
+                        action: 'processStep1',
+                        fields: that.fields
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+                    // that.formStatus = response.formStatus;
+                    // that.formMessage = response.formMessage;
+                    that.fields = response.data.fields;
+                    that.focusField(formFocusedFieldIdCode);
+                    //that.pageStatus = 'ready';
+                    setTimeout(that.processStep2, 2000);
+                }).catch(function (error) {
+                    that.formMessageKind = 'error';
+                    that.formMessage = 'An unknown error occurred.';
+                });
+            },
+            processStep2: function () {
+                this.pageStatus = 'busy';
+                this.processMessage = 'STEP 2: Deleting "Manage Item" page...';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'controllerDeleteItemType',
+                    data: {
+                        action: 'processStep2',
+                        fields: that.fields
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+                    // that.formStatus = response.formStatus;
+                    // that.formMessage = response.formMessage;
+                    that.fields = response.data.fields;
+                    that.focusField(formFocusedFieldIdCode);
+                    //that.pageStatus = 'ready';
+                    setTimeout(that.processStep3, 5000);
+                }).catch(function (error) {
+                    that.formMessageKind = 'error';
+                    that.formMessage = 'An unknown error occurred.';
+                });
+            },
+            processStep3: function () {
+                this.pageStatus = 'busy';
+                this.processMessage = 'STEP 3: Deleting item type files and database table...';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'controllerDeleteItemType',
+                    data: {
+                        action: 'processStep3',
+                        fields: that.fields
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+                    // that.formStatus = response.formStatus;
+                    // that.formMessage = response.formMessage;
+                    that.fields = response.data.fields;
+                    that.focusField(formFocusedFieldIdCode);
+                    //that.pageStatus = 'ready';
+                    setTimeout(function () {
+                        qsys.gotoPage('deleteItemType');
+                    }, 2000);
+                }).catch(function (error) {
+                    that.formMessageKind = 'error';
+                    that.formMessage = 'An unknown error occurred.';
+                });
+            },
+            onEnterClick: function () {
+                $('#buttonSubmit').click();
+            },
+            qstr_isEmpty: function (line) {
+                return qstr.isEmpty(line);
+            },
+            formSubmitButtonShouldBeDisabled: function () {
+                if (!this.clientSideEmptyFieldChecking) {
+                    return false;
+                }
+                if (this.pageStatus == 'busy') {
+                    return true;
+                }
+                for (const key in this.fields) {
+                    const field = this.fields[key];
+                    if (field.required && qstr.isEmpty(field.value)) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            keyWasPressed: function (e) {
+
+                if (e.keyCode === 13 && e.ctrlKey) {
+                    this.onEnterClick();
+                }
+
+                this.formSubmitButtonShouldBeDisabled();
+
+                let thereAreErrors = false;
+
+                //empty fields
+                for (const idCode in this.fields) {
+                    const field = this.fields[idCode];
+                    if (field.required && qstr.isEmpty(field.value)) {
+                        this.setDataInFields(idCode, 'errorMessage', 'This value is required and cannot be empty.');
+                        thereAreErrors = true;
+                    } else {
+                        this.setDataInFields(idCode, 'errorMessage', '');
+                    }
+                }
+            },
+            focusField: function (fieldIdCode) {
+                setTimeout(function () {
+                    $('#field_' + fieldIdCode).focus();
+                }, 50);
+            },
+            setDataInFields: function (idCode, property, value) {
+                const field = `${idCode}.${property}`;
+                _.set(this.fields, field, value)
+
+            },
+            thereAreRequiredFields: function () {
+                for (const idCode in this.fields) {
+                    const field = this.fields[idCode];
+                    if (field.required) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            switchChoiceSelector: function (field) {
+                switch (field.choiceSelector) {
+                    case 'radioVertical':
+                        field.choiceSelector = 'dropdown';
+                        break;
+                    case 'dropdown':
+                        field.choiceSelector = 'radioHorizontal';
+                        break;
+                    case 'radioHorizontal':
+                    default:
+                        field.choiceSelector = 'radioVertical';
+                        break;
+                }
+            }
+        }
+    });
+    app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

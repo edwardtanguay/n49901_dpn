@@ -1,0 +1,231 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+<style>
+    #field_definitionBlock {
+        height: 200px;
+        font-size: 14px;
+    }
+    .theLabel {
+        font-weight: bold;
+    }
+    .showCodeToCopy {
+        margin: 10px 0 0 0;
+    }
+    </style>
+
+<div id="app">
+    <div class="card smartFormCard">
+        <div class="card-header">
+            <div class="pull-left" :class="{areaLoading: pageStatus=='busy'}">Showcase: Generate Form Code Blocks</div>
+            <div class="pull-right">
+                <i v-if="pageStatus!='ready'" class="pull-left fa fa-cog fa-spin waitSpinner"></i>
+            </div>
+        </div>
+        <div class="card-body smartFormBody" :class="{areaLoading: pageStatus=='busy'}">
+            <div class="messageArea" style="display:none">
+                <div v-if="formStatus=='success'" class="alert alert-success" v-html="formMessage"></div>
+                <div v-if="formStatus=='invalid'" class="alert alert-danger">
+                    <strong>Form is invalid:</strong> {{formMessage}}
+                </div>
+                <div v-if="formStatus=='error'" class="alert alert-danger">
+                    <strong>Error:</strong> <span v-html="formMessage"></span>
+                </div>
+            </div>
+            <div v-show="pageStatus!='busy'" class="bodyContent" style="display:none">
+
+                <!-- field: DEFINITIONBLOCK -->
+                <dl>
+                    <dt><span v-if="fields.definitionBlock.required">*</span>{{fields.definitionBlock.label}}</dt>
+                    <dd>
+                        <div>
+                            <textarea id="field_definitionBlock" :disabled="pageStatus=='busy'" v-model="fields.definitionBlock.value"
+                                @keydown="keyWasPressed" @keyup="keyWasPressed" class="form-control dataType_paragraph"></textarea>
+                        </div>
+                        <div>
+                            <small v-if="fields.definitionBlock.errorMessage != ''" class="error">{{fields.definitionBlock.errorMessage}}
+                            </small>
+                            <small v-if="fields.definitionBlock.info" class="info">{{fields.definitionBlock.info}} </small>
+                            <small v-if="fields.definitionBlock.example" class="example"><span class="exampleLabel">Example:</span> <span class="exampleText">{{fields.definitionBlock.example}}</span>
+                            </small>
+                        </div>
+                    </dd>
+                </dl>
+
+                <!-- form notes -->
+                <div class="pull-left formNotes">
+                    <span v-if="thereAreRequiredFields()" class="requiredFieldMarker">* required field</span>
+                </div>
+
+                <!-- submit button -->
+                <div class="pull-right">
+                    <button id="buttonSubmit" :disabled="formSubmitButtonShouldBeDisabled()" @click="processForm()"
+                        class="btn btn-default formButton">Parse</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <textarea v-show="outputCodeText" class="showCodeToCopy" v-model="outputCodeText" readonly></textarea>
+
+
+</div>
+
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            clientSideEmptyFieldChecking: false,
+            pageStatus: 'ready',
+            formStatus: '',
+            formMessage: '',
+            fields: {
+                definitionBlock: {
+                    label: '',
+                    dataTypeIdCode: '',
+                    value: '',
+                    info: '',
+                    example: '',
+                    required: false,
+                    errorStatus: '',
+                    errorMessage: '',
+                    displayStatus: '',
+                    choices: '',
+                    choiceSelector: ''
+                }
+            },
+            outputCodeText: ''
+        },
+        methods: {
+            initialize: function () {
+                $('.bodyContent').show();
+                $('.messageArea').show();
+                this.loadPageData();
+            },
+            loadPageData: function () {
+                this.pageStatus = 'busy';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'controllerShowcaseFormCodeBlocks',
+                    data: {
+                        action: 'loadPageData'
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+                    that.fields = response.data.fields;
+                    that.focusField(formFocusedFieldIdCode);
+                    that.pageStatus = 'ready';
+                }).catch(function (error) {
+                    that.pageStatus = 'failed';
+                });
+            },
+            processForm: function () {
+                this.pageStatus = 'busy';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'controllerShowcaseFormCodeBlocks',
+                    data: {
+                        action: 'processForm',
+                        fields: that.fields
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+                    that.outputCodeText = response.data.outputCodeText;
+                    that.formStatus = response.formStatus;
+                    that.formMessage = response.formMessage;
+                    that.fields = response.data.fields;
+                    console.log(formFocusedFieldIdCode);
+                    that.focusField(formFocusedFieldIdCode);
+                    that.pageStatus = 'ready';
+                }).catch(function (error) {
+                    that.formMessageKind = 'error';
+                    that.formMessage = 'An unknown error occurred.';
+                });
+            },
+            onEnterClick: function () {
+                $('#buttonSubmit').click();
+            },
+            qstr_isEmpty: function (line) {
+                return qstr.isEmpty(line);
+            },
+            formSubmitButtonShouldBeDisabled: function () {
+                if (!this.clientSideEmptyFieldChecking) {
+                    return false;
+                }
+                if (this.pageStatus == 'busy') {
+                    return true;
+                }
+                for (const key in this.fields) {
+                    const field = this.fields[key];
+                    if (field.required && qstr.isEmpty(field.value)) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            keyWasPressed: function (e) {
+
+                if (e.keyCode === 13 && e.ctrlKey) {
+                    this.onEnterClick();
+                }
+
+                this.formSubmitButtonShouldBeDisabled();
+
+                let thereAreErrors = false;
+
+                //empty fields
+                for (const idCode in this.fields) {
+                    const field = this.fields[idCode];
+                    if (field.required && qstr.isEmpty(field.value)) {
+                        this.setDataInFields(idCode, 'errorMessage', 'This value is required and cannot be empty.');
+                        thereAreErrors = true;
+                    } else {
+                        this.setDataInFields(idCode, 'errorMessage', '');
+                    }
+                }
+            },
+            focusField: function (fieldIdCode) {
+                setTimeout(function () {
+                    $('#field_' + fieldIdCode).focus();
+                }, 50);
+            },
+            setDataInFields: function (idCode, property, value) {
+                const field = `${idCode}.${property}`;
+                _.set(this.fields, field, value)
+
+            },
+            thereAreRequiredFields: function () {
+                for (const idCode in this.fields) {
+                    const field = this.fields[idCode];
+                    if (field.required) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            switchChoiceSelector: function (field) {
+                switch (field.choiceSelector) {
+                    case 'radioVertical':
+                        field.choiceSelector = 'dropdown';
+                        break;
+                    case 'dropdown':
+                        field.choiceSelector = 'radioHorizontal';
+                        break;
+                    case 'radioHorizontal':
+                    default:
+                        field.choiceSelector = 'radioVertical';
+                        break;
+                }
+            }
+        }
+    });
+    app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

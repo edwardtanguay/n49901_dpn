@@ -1,0 +1,64 @@
+<%
+if(data.system_extensionIdCodes.includes('jquery')) {
+%>
+<!-- JQUERY -->
+<script src="<%=data.system_frontendLibraryPaths.jquery%>"></script>
+<%
+}
+%>
+
+<%
+if(data.system_extensionIdCodes.includes('bootstrap')) {
+%>
+<!-- BOOTSTRAP -->
+<link rel="stylesheet" href="<%=data.system_frontendLibraryPaths.bootstrapCss%>">
+<script src="<%=data.system_frontendLibraryPaths.bootstrapJs%>"></script>
+<script src="<%=data.system_frontendLibraryPaths.popper%>"></script>
+<%
+}
+%>
+
+<%
+if(data.system_extensionIdCodes.includes('fontawesome')) {
+%>
+<!-- FONTAWESOME -->
+<link rel="stylesheet" type="text/css" href="<%=data.system_frontendLibraryPaths.fontAwesome%>" />
+<%
+}
+%>
+
+<%
+if(data.system_extensionIdCodes.includes('vuejs')) {
+%>
+<!-- VUEJS -->
+<script src="<%=data.system_frontendLibraryPaths.vuejs%>"></script>
+<%
+}
+%>
+
+<%
+if(data.system_extensionIdCodes.includes('axios')) {
+%>
+<!-- AXIOS -->
+<script src="<%=data.system_frontendLibraryPaths.axios%>"></script>
+<%
+}
+%>
+
+<%
+if(data.system_extensionIdCodes.includes('lodash')) {
+%>
+<!-- LODASH -->
+<script src="<%=data.system_frontendLibraryPaths.lodash%>"></script>
+<%
+}
+%>
+
+<%
+if(data.system_extensionIdCodes.includes('bootbox')) {
+%>
+<!-- BOOTBOX -->
+<script src="<%=data.system_frontendLibraryPaths.bootbox%>"></script>
+<%
+}
+%>

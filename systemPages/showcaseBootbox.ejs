@@ -1,0 +1,49 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,bootbox,vuejs
+%>
+<%- include(data.system_layout_header)  %>
+
+<h3>Showcase: Bootbox</h3>
+
+
+<div id="app">
+    <button type="button" @click="simpleMessage()" class="btn btn-default">Simple Message</button>
+    <button type="button" @click="confirmMessage()" class="btn btn-default">Confirm Message</button>
+    <hr/>
+    <div>{{status}}</div>
+    <hr/>
+</div>
+
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            status: 'message not yet viewed'
+        },
+        methods: {
+            simpleMessage: function () {
+                const that = this;
+                bootbox.alert("This is a <b>simple</b> message.", function () {
+                    that.status = "simple message viewed";
+                });
+            },
+            confirmMessage: function () {
+                const that = this;
+                bootbox.confirm({
+                    size: "small",
+                    message: "Confirm the message?",
+                    callback: function (confirmed) {
+                        if(confirmed) {
+                            that.status = "message was confirmed";
+                        } else {
+                            that.status = "message was NOT confirmed"
+                        }
+                    }
+                });
+            }
+        }
+    });
+</script>
+
+
+<%- include(data.system_layout_footer)  %>

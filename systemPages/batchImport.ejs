@@ -1,0 +1,654 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+<style>
+	#field_inputText {
+		height: 230px;
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 13px;
+		background-color: #f3f3f3;
+	}
+
+	.showLinesLong {
+		white-space: nowrap;
+		overflow-x: auto;
+		font-family: 'Courier New', Courier, monospace !important;
+		font-size: 11px !important;
+		background-color: #ddd !important;
+		;
+	}
+
+	.linesLink {
+		cursor: pointer;
+	}
+
+	.linesLink:hover {
+		text-decoration: underline;
+	}
+
+	.itemsArea {
+		padding: 10px;
+		border: 5px solid #eee;
+		border-radius: 5px;
+		margin: 0 0 10px 0;
+	}
+
+	.batchImportBlock {
+		border: 1px solid #ddd;
+		border-radius: 5px;
+		margin: 0 5px 5px 0;
+		float: left;
+		font-size: 11px;
+		padding: 5px;
+		width: 100%;
+		background-color: #f3f3f3;
+		overflow: auto;
+	}
+
+	.item .title {
+		font-size: 17px;
+		border-bottom: 1px solid #ddd;
+		margin: 0 0 7px 0;
+	}
+
+	.item td.label {
+		color: brown;
+		vertical-align: top;
+		white-space: nowrap;
+	}
+
+	.item td.value {
+		background-color: white;
+		vertical-align: top;
+	}
+
+	.item td.valueSystem {
+		color: brown;
+		vertical-align: top;
+		border-bottom: 2px solid #eee;
+		font-weight: bold;
+		font-family: 'Courier New', Courier, monospace;
+	}
+
+	h3 {
+		font-size: 18px;
+
+	}
+
+	.actionButton {
+		margin: 0 0 5px 0;
+		float: right;
+	}
+
+	.importAllButton {
+		margin: 0 0 0 0;
+		float: right;
+	}
+
+	.btn-group-xs>.btn,
+	.btn-xs {
+		padding: .25rem .4rem;
+		font-size: .875rem;
+		line-height: 1;
+		border-radius: .2rem;
+	}
+
+	.templateArea {
+		font-size: 12px;
+		margin: 0 0 5px 0;
+	}
+
+	.templateArea .link {
+		cursor: pointer;
+		text-decoration: underline;
+		color: #777;
+	}
+
+	.templateArea .link:hover {
+		text-decoration: underline;
+		color: #000;
+	}
+
+	.errorFieldArea {
+		color: darkred !important;
+		background-color: #ddd !important;
+		border: 1px solid tomato !important;
+	}
+
+	tr.fieldError td.errorMessage {
+		color: tomato;
+		padding: 0 0 10px 0 !important;
+		background-color: #f3f3f3;
+
+	}
+
+	table.itemsTable {
+		border-spacing: 2px;
+		border-collapse: separate;
+	}
+
+	.waitArea {
+		margin: 0 0 57px 0;
+	}
+
+	.waitArea i {
+		color: #ccc;
+		font-size: 22px;
+	}
+</style>
+
+<div id="app">
+
+	<div class="card smartFormCard">
+		<div class="card-header">
+			<div class="pull-left" :class="{areaLoading: pageStatus=='busy'}">Batch Import</div>
+			<div class="pull-right">
+				<div class="pull-left headerInfo"></div><i v-show="pageStatus!='ready'"
+					class="pull-left fa fa-cog fa-spin waitSpinner"></i>
+			</div>
+		</div>
+		<div class="card-body smartFormBody" :class="{areaLoading: pageStatus=='busy'}">
+			<div class="messageArea" style="display:none">
+				<div v-if="formStatus=='success'" class="alert alert-success" v-html="formMessage"></div>
+				<div v-if="formStatus=='invalid'" class="alert alert-danger">
+					<strong>Form is invalid:</strong> {{formMessage}}
+				</div>
+				<div v-if="formStatus=='error'" class="alert alert-danger">
+					<strong>Error:</strong> <span v-html="formMessage"></span>
+				</div>
+			</div>
+			<div v-show="pageStatus!='busy'" class="bodyContent" style="display:none">
+
+				<!-- field: INPUTTEXT -->
+				<div class="templateArea">
+					ITEM TEMPLATES: <span v-for="(item, index) in batchImportItemTypeRecords"><span class="link"
+							@click="showItemTemplate(item)">{{item.singularTitle}}</span><span
+							v-if="index < batchImportItemTypeRecords.length - 1">, </span></span>
+				</div>
+				<dl>
+					<dt style="display:none"><span v-if="fields.inputText.required">*</span>{{fields.inputText.label}}
+					</dt>
+					<dd>
+						<div>
+							<textarea id="field_inputText" :disabled="pageStatus=='busy'" v-model="originText"
+								@paste="inputTextOnPaste()" class="form-control dataType_paragraph_control"
+								:class="{showLinesLong: showLinesLong}"></textarea>
+						</div>
+						<div>
+							<small v-if="fields.inputText.errorMessage != ''"
+								class="error">{{fields.inputText.errorMessage}}
+							</small>
+							<small v-if="fields.inputText.info" class="info">{{fields.inputText.info}} </small>
+							<small v-if="fields.inputText.example" class="example"><span
+									class="exampleLabel">Example:</span> <span
+									class="exampleText">{{fields.inputText.example}}</span>
+							</small>
+							<small v-show="getNumberOfLinesInInputText() > 0" @click="toggleShowLinesLong()"
+								class="linesLink pull-right">{{smartPlural(getNumberOfLinesInInputText(), 'line', 'lines')}}
+								<span style="display:none" v-show="showLinesLong"> (no wrap)</span></small>
+						</div>
+					</dd>
+				</dl>
+
+				<div class="waitArea" v-show="pageStatus =='processingForm'">
+					<i class="pull-left fa fa-cog fa-spin"></i>
+				</div>
+
+				<div v-show="pageStatus !='processingForm'" class="showResultsArea">
+
+					<!-- ITEMS -->
+					<h3>{{batchImportBlockObjectRecords.length}} Total Items:
+						<button v-if="getImportButtonText() != 'dontShow'" v-show="numberOfItemsToSave() > 0"
+							class="importAllButton btn btn-default btn-xs"
+							@click="importAll()">{{getImportButtonText().toUpperCase()}}</button>
+					</h3>
+					<div class="itemsArea">
+						<div class="batchImportBlock item" v-for="item in batchImportItems()">
+							<div class="title">{{item.itemTypeTitle}}
+								<button v-show="item.action == 'import'" class="actionButton btn btn-default btn-xs"
+									@click="importSingleBatchImportBlockObjectRecord(item)">Import</button>
+								<button v-show="item.action == 'update'" class="actionButton btn btn-default btn-xs"
+									@click="updateSingleBatchImportBlockObjectRecord(item)">Update</button>
+								<button v-show="item.action == 'showError'" class="actionButton btn btn-default btn-xs"
+									disabled>Invalid</button>
+								<div class="clear"></div>
+							</div>
+							<table class="itemsTable">
+								<tr v-show="item.action == 'update'">
+									<td class="label">ID:</td>
+									<td class="valueSystem">{{item.baseItem.id}}</td>
+								</tr>
+								<template v-for="field in item.fields">
+									<tr>
+										<td class="label">{{field.label}}:</td>
+										<td class="value" :class="{errorFieldArea: thisFieldHasAnError(item, field)}"
+											v-html="parseForHtml(field.value)"></td>
+									</tr>
+									<tr class="fieldError" v-if="thisFieldHasAnError(item, field)">
+										<td></td>
+										<td class="errorMessage" v-html="getFieldErrorMessage(item, field)"></td>
+									</tr>
+
+								</template>
+							</table>
+						</div>
+						<div class="clear"></div>
+					</div>
+
+					<!-- ITEMS: UNKNOWN ITEMTYPE -->
+					<div v-show="filterOn(batchImportBlockObjectRecords, 'unknownItemType').length > 0">
+						<h3>{{smartPlural(filterOn(batchImportBlockObjectRecords, 'unknownItemType').length, 'Unknown Item', 'Unknown Items')}}:
+						</h3>
+						<div class="itemsArea">
+							<div class="batchImportBlock"
+								v-for="item in filterOn(batchImportBlockObjectRecords, 'unknownItemType')">
+								<div>{{item.marker}}<span v-if="item.marker != '=='">&nbsp;</span>{{item.markerLine}}
+									({{item.type}})</div>
+							</div>
+							<div class="clear"></div>
+						</div>
+					</div>
+
+					<!-- COMMANDS -->
+					<div v-show="filterOn(batchImportBlockObjectRecords, 'command').length > 0">
+						<h3>Unknown Text:</h3>
+						<div class="itemsArea">
+							<div class="batchImportBlock"
+								v-for="item in filterOn(batchImportBlockObjectRecords, 'command')">
+								<div>{{item.marker}}<span v-if="item.marker != '=='">&nbsp;</span>{{item.markerLine}}
+									({{item.type}})</div>
+							</div>
+							<div class="clear"></div>
+						</div>
+					</div>
+
+					<!-- form notes -->
+					<div class="pull-left formNotes">
+						<span v-if="thereAreRequiredFields()" class="requiredFieldMarker">* required field</span>
+					</div>
+
+					<!-- submit button -->
+					<div style="display:none" class="pull-right">
+						<button id="buttonSubmit" :disabled="formSubmitButtonShouldBeDisabled()" @click="processForm()"
+							class="btn btn-default formButton">Parse</button>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+</div>
+
+<script>
+	const app = new Vue({
+		el: '#app',
+		data: {
+			clientSideEmptyFieldChecking: false,
+			pageStatus: 'ready',
+			formStatus: '',
+			formMessage: '',
+			fields: {
+				inputText: {
+					label: '',
+					dataTypeIdCode: '',
+					value: '',
+					info: '',
+					example: '',
+					required: false,
+					errorStatus: '',
+					errorMessage: '',
+					displayStatus: '',
+					choices: '',
+					choiceSelector: ''
+				},
+				outputText: {
+					label: '',
+					dataTypeIdCode: '',
+					value: '',
+					info: '',
+					example: '',
+					required: false,
+					errorStatus: '',
+					errorMessage: '',
+					displayStatus: '',
+					choices: '',
+					choiceSelector: ''
+				}
+			},
+			originText: '',
+			batchImportBlockObjectRecords: [],
+			watching: true,
+			firstTime: false,
+			showLinesLong: false,
+			batchImportItemTypeRecords: [],
+			user: {
+				name: 'bashir'
+			}
+		},
+		methods: {
+			initialize: function () {
+				$('.bodyContent').show();
+				$('.messageArea').show();
+				this.loadPageData();
+			},
+			loadPageData: function () {
+				this.pageStatus = 'busy';
+				const that = this;
+				axios({
+					method: 'post',
+					url: 'controllerBatchImport',
+					data: {
+						action: 'loadPageData'
+					}
+				}).then(function (responseObject) {
+					const response = qsys.getResponse(responseObject);
+					that.batchImportItemTypeRecords = response.data.batchImportItemTypeRecords;
+					const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+					that.fields = response.data.fields;
+					that.focusField(formFocusedFieldIdCode);
+					that.pageStatus = 'ready';
+					that.originText = that.fields.inputText.value;
+
+					that.enhanceItems();
+
+				}).catch(function (error) {
+					that.pageStatus = 'failed';
+				});
+			},
+			enhanceItems: function () {
+				for (const item of this.batchImportBlockObjectRecords) {
+					if (item.fieldValidationErrors.length > 0) {
+						item.todo = 'showError';
+					}
+				}
+			},
+			processForm: function () {
+				this.pageStatus = 'processingForm';
+				const that = this;
+				const saveValue = this.fields.inputText.value;
+				axios({
+					method: 'post',
+					url: 'controllerBatchImport',
+					data: {
+						action: 'processForm',
+						fields: that.fields
+					}
+				}).then(function (responseObject) {
+					const response = qsys.getResponse(responseObject);
+					const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+					that.fields = response.data.fields;
+					that.batchImportBlockObjectRecords = response.data.batchImportBlockObjectRecords;
+
+					that.pageStatus = 'ready';
+					that.focusField(formFocusedFieldIdCode);
+					if (that.firstTime) {
+						qsys.scrollToTopOfTextArea('#field_inputText');
+						//that.fullTrimInputText();
+						that.firstTime = false;
+					}
+
+					that.enhanceItems();
+
+				}).catch(function (error) {
+					that.formMessageKind = 'error';
+					that.formMessage = 'An unknown error occurred.';
+				});
+			},
+			import: function () {
+				const that = this;
+				axios({
+					method: 'post',
+					url: 'controllerBatchImport',
+					data: {
+						action: 'import',
+						batchImportBlockObjectRecords: this.batchImportBlockObjectRecords
+					}
+				}).then(function (responseObject) {
+					const response = qsys.getResponse(responseObject);
+					const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+					that.formStatus = response.formStatus;
+					that.formMessage = response.formMessage;
+					that.pageStatus = 'ready';
+					that.focusField(formFocusedFieldIdCode);
+					that.originText = response.data.originText;
+					if (!qstr.isEmpty(that.formMessage)) {
+						$('.messageArea').hide();
+						$('.messageArea').fadeIn(300);
+					}
+					qsys.scrollToTopOfTextArea('#field_inputText');
+					that.fullTrimInputText();
+				}).catch(function (error) {
+					that.formMessageKind = 'error';
+					that.formMessage = 'An unknown error occurred.';
+				});
+			},
+			onEnterClick: function () {
+				$('#buttonSubmit').click();
+			},
+			qstr_isEmpty: function (line) {
+				return qstr.isEmpty(line);
+			},
+			formSubmitButtonShouldBeDisabled: function () {
+				if (!this.clientSideEmptyFieldChecking) {
+					return false;
+				}
+				if (this.pageStatus == 'busy') {
+					return true;
+				}
+				for (const key in this.fields) {
+					const field = this.fields[key];
+					if (field.required && qstr.isEmpty(field.value)) {
+						return true;
+					}
+				}
+				return false;
+			},
+			keyWasPressed: function (e) {
+
+				if (e.keyCode === 13 && e.ctrlKey) {
+					this.onEnterClick();
+				}
+
+				this.formSubmitButtonShouldBeDisabled();
+
+				let thereAreErrors = false;
+
+				//empty fields
+				for (const idCode in this.fields) {
+					const field = this.fields[idCode];
+					if (field.required && qstr.isEmpty(field.value)) {
+						this.setDataInFields(idCode, 'errorMessage', 'This value is required and cannot be empty.');
+						thereAreErrors = true;
+					} else {
+						this.setDataInFields(idCode, 'errorMessage', '');
+					}
+				}
+			},
+			focusField: function (fieldIdCode) {
+				setTimeout(function () {
+					$('#field_' + fieldIdCode).focus();
+				}, 50);
+			},
+			setDataInFields: function (idCode, property, value) {
+				const field = `${idCode}.${property}`;
+				_.set(this.fields, field, value)
+
+			},
+			thereAreRequiredFields: function () {
+				for (const idCode in this.fields) {
+					const field = this.fields[idCode];
+					if (field.required) {
+						return true;
+					}
+				}
+				return false;
+			},
+			switchChoiceSelector: function (field) {
+				switch (field.choiceSelector) {
+					case 'radioVertical':
+						field.choiceSelector = 'dropdown';
+						break;
+					case 'dropdown':
+						field.choiceSelector = 'radioHorizontal';
+						break;
+					case 'radioHorizontal':
+					default:
+						field.choiceSelector = 'radioVertical';
+						break;
+				}
+			},
+			filterOn: function (records, type) {
+				return records.filter(item => item.type == type);
+			},
+			smartPlural: function (numberOfItems, singular, plural) {
+				let r = '';
+				r += numberOfItems + ' ';
+				r += numberOfItems == 1 ? singular : plural;
+				return r;
+			},
+			importSingleBatchImportBlockObjectRecord: function (batchImportBlockObjectRecord) {
+				batchImportBlockObjectRecord.todo = 'save';
+				this.import();
+			},
+			updateSingleBatchImportBlockObjectRecord: function (batchImportBlockObjectRecord) {
+				batchImportBlockObjectRecord.todo = 'save';
+				this.import();
+			},
+			importAll: function () {
+				const newBatchImportBlockObjectRecords = [];
+				for (const item of this.batchImportBlockObjectRecords) {
+					if (item.action != 'showError') {
+						item.todo = 'save';
+					}
+					newBatchImportBlockObjectRecords.push(item);
+				}
+				this.batchImportBlockObjectRecords = newBatchImportBlockObjectRecords;
+				this.import();
+			},
+			getNumberOfLinesInInputText: function () {
+				if (this.fields.inputText.value == '') {
+					return 0;
+				} else {
+					return qstr.countLinesInStringBlock(this.fields.inputText.value, false);
+				}
+			},
+			inputTextOnPaste: function () {
+				this.firstTime = true;
+			},
+			fullTrimInputText: function () {
+				this.originText = this.originText.trim();
+				this.originText = qstr.internalExternalTrim(this.originText);
+			},
+			toggleShowLinesLong: function () {
+				this.showLinesLong = !this.showLinesLong;
+			},
+			batchImportItems: function () {
+				return this.batchImportBlockObjectRecords.filter(item => item.type == 'item');
+			},
+			parseForHtml: function (text) {
+				let html = text;
+				html = qstr.encodeHtmlForDisplay(html);
+				html = qstr.replaceAll(html, '\n', '<br/>');
+				html = qstr.replaceAll(html, '\t', '&nbsp;'.repeat(4));
+				return html;
+			},
+			showItemTemplate: function (item) {
+				this.originText = item.templateText;
+			},
+			thisFieldHasAnError: function (item, field) {
+				if (item.fieldValidationErrors.filter(m => m.fieldIdCode == field.idCode).length > 0) {
+					item.action = 'showError';
+					return true;
+				}
+				return false;
+			},
+			getFieldErrorMessage: function (item, field) {
+				return item.fieldValidationErrors.find(m => m.fieldIdCode == field.idCode).errorMessage;
+			},
+			numberOfItemsToSave: function () {
+				return this.batchImportBlockObjectRecords.filter(m => m.todo != 'showError').length;
+			},
+			getImportButtonText() {
+				this.$forceUpdate();
+				const numberOfShowErrors = this.batchImportBlockObjectRecords.filter(m => m.action == 'showError').length;
+				const numberOfImports = this.batchImportBlockObjectRecords.filter(m => m.action == 'import').length;
+				const numberOfUpdates = this.batchImportBlockObjectRecords.filter(m => m.action == 'update').length;
+				const numberOfTotalItems = this.batchImportBlockObjectRecords.length;
+
+				// console.log('numberOfShowErrors' + numberOfShowErrors);
+				// console.log('numberOfImports' + numberOfImports);
+				// console.log('numberOfUpdates' + numberOfUpdates);
+
+				// not enough to show button
+				if (numberOfShowErrors == 0 && numberOfUpdates == 0 && numberOfImports <= 1) {
+					return `dontShow`;
+				}
+
+				// only one update
+				if (numberOfShowErrors == 0 && numberOfUpdates == 1 && numberOfImports >= 0) {
+					return `dontShow`;
+				}
+
+				// everything ok, just imports
+				if (numberOfShowErrors == 0 && numberOfUpdates == 0 && numberOfImports > 1) {
+					return `Import all ${numberOfTotalItems} valid items`;
+				}
+
+				// some imports and some invalid
+				if (numberOfShowErrors > 0 && numberOfUpdates == 0 && numberOfImports > 0) {
+					return `Import ${qstr.smartPlural(numberOfImports, 'valid items')}, keep  ${qstr.smartPlural(numberOfShowErrors, 'invalid items')}`;
+				}
+
+				// some of all three kinds
+				if (numberOfShowErrors > 0 && numberOfUpdates > 0 && numberOfImports > 0) {
+					return `Import ${qstr.smartPlural(numberOfImports, 'valid items')}, update ${qstr.smartPlural(numberOfUpdates, 'valid items')}, keep  ${qstr.smartPlural(numberOfShowErrors, 'invalid items')}`;
+				}
+
+				// some update and import but not invalids
+				if (numberOfShowErrors == 0 && numberOfUpdates > 0 && numberOfImports > 0) {
+					return `Import ${qstr.smartPlural(numberOfImports, 'valid items')}, update ${qstr.smartPlural(numberOfUpdates, 'valid items')}`;
+				}
+
+				return 'todo...';
+
+			}
+		},
+		watch: {
+			originText: function (val, oldVal) {
+				if (this.watching) {
+					this.fields.inputText.value = val;
+					this.processForm();
+				}
+				this.watching = true;
+			}
+		}
+	});
+	app.initialize();
+
+	$(function () {
+		$(document).delegate('#field_inputText', 'keydown', function (e) {
+			var keyCode = e.keyCode || e.which;
+
+			if (keyCode == 9) {
+				e.preventDefault();
+				var start = this.selectionStart;
+				var end = this.selectionEnd;
+
+				// set textarea value to: text before caret + tab + text after caret
+				$(this).val($(this).val().substring(0, start)
+					+ "\t"
+					+ $(this).val().substring(end));
+
+				// put caret at right position again
+				this.selectionStart = this.selectionEnd = start + 1;
+			}
+		});
+	});
+
+</script>
+
+<%- include(data.system_layout_footer)  %>

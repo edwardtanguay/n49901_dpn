@@ -1,0 +1,35 @@
+"use strict"
+const Items = require('./items');
+const qdat = require('../qtools/qdat');
+
+class @@pluralPascalNotation extends Items {
+
+    getItemTypeDefinitionBlock() {
+        return `
+@@itemTypeDefinitionBlock
+        `;
+    }
+
+    constructor(loadIdCode) {
+        super(loadIdCode);
+        this.itemTypeIdCode = '@@pluralCamelNotation';
+        this.loadItems();
+    }
+
+    loadItems() {
+        super.loadItems();
+        switch (this.loadIdCode) {}
+
+    }
+
+	enhance() {
+		for (const item of this.items) {
+			item.niceSystemWhenCreated = qdat.getShortMonthWithWeekDay(item.systemWhenCreated);
+			item.htmlBody = item.getDefaultHtmlBodyAsTable();
+            item.itemTextBlock = item.getItemTextBlock();
+		}
+	}	
+
+}
+
+module.exports = @@pluralPascalNotation

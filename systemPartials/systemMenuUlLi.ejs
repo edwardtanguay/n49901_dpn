@@ -1,0 +1,11 @@
+<ul>
+    <% data.system_menuPageItems.forEach(function(item) { %>
+        <li>
+            <%if (false || item.idCode == data.system_currentPageItem.idCode) { %>
+                <span class="pageSelected"><%= item.title %></span>
+            <% } else { %>
+                <a href="<%= item.idCode %>"><%= item.title %></a>
+            <% } %>
+        </li>
+    <% }); %>
+</ul>

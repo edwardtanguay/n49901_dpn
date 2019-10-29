@@ -1,0 +1,92 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+<style>
+	h4 {
+		font-size: 21px;
+		border-bottom: 1px solid #ccc;
+		width: 400px;
+		margin: 20px 0 10px 0;
+	}
+
+	.controlAgeNumber {
+		width: 70px;
+		text-align: right;
+	}
+
+	.controlAge {
+		width: 300px;
+		margin: 5px 0 0 10px;
+	}
+
+
+
+	/* TODO: put in .less file: https://www.cssportal.com/style-input-range/ */
+</style>
+<div id="app" class="pageContent" style="display:none">
+
+	<h3>Showcase: Sliders</h3>
+
+	<h4>Simple Example</h4>
+	Participant's age:
+	<div class="flex-container">
+		<div><input class="form-control form-control-sm controlAgeNumber" v-model="age" /></div>
+		<div><input class="controlAge" type="range" min="1" max="1000" v-model="age"></div>
+	</div>
+
+	<h4>Stars Example</h4>
+	<div>todo</div>
+
+	<h4>Database Example</h4>
+	<div>todo</div>
+
+
+	<div v-show="pageStatus == 'busy'"><i class="fa fa-spinner fa-pulse page_loading_spinner" aria-hidden="true"></i>
+	</div>
+
+</div>
+
+<script>
+	const app = new Vue({
+		el: '#app',
+		data: {
+			pageStatus: 'ready',
+			age: '',
+			months: [
+				'January',
+				'February',
+				'March',
+				'April',
+			]
+		},
+		methods: {
+			initialize: function () {
+				$("#app").fadeIn(100);
+				$('.bodyContent').show();
+				this.loadPageData();
+			},
+			loadPageData: function () {
+				this.pageStatus = 'busy';
+				const that = this;
+				axios({
+					method: 'post',
+					url: 'controllerShowcaseSliders',
+					data: {
+						action: 'loadPageData'
+					}
+				}).then(function (responseObject) {
+					const response = qsys.getResponse(responseObject);
+					that.age = response.data.age;
+					that.pageStatus = 'ready';
+				}).catch(function (error) {
+					that.pageStatus = 'failed';
+				});
+			}
+		}
+	});
+	app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

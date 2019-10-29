@@ -1,0 +1,230 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+<div id="app">
+
+    <div class="card smartFormCard">
+        <div class="card-header">
+            <div class="pull-left" :class="{areaLoading: pageStatus=='busy'}">Showcase: DpDataLoader
+                <div class="subtitle">This showcase shows you how to use the asynchronous DpDataLoader class with
+                    multiple and chained commands. Currently it adds, changes and then deletes ShowcaseBook items.
+                    Note that unless you chain the commands, you have no control over what order the items are
+                    executed.
+                    But because the deleting commands are chained after the adding commands, all items that are
+                    added are always deleted.
+                </div>
+            </div>
+            <div class="pull-right">
+                <i v-show="pageStatus!='ready'" class="pull-left fa fa-cog fa-spin waitSpinner"></i>
+            </div>
+        </div>
+        <div class="card-body smartFormBody" :class="{areaLoading: pageStatus=='busy'}">
+            <div class="messageArea" style="display:none">
+                <div v-show="formStatus=='success'" class="alert alert-success" v-html="formMessage"></div>
+                <div v-show="formStatus=='invalid'" class="alert alert-danger">
+                    <strong>Form is invalid:</strong> {{formMessage}}
+                </div>
+                <div v-show="formStatus=='error'" class="alert alert-danger">
+                    <strong>Error:</strong> <span v-html="formMessage"></span>
+                </div>
+            </div>
+            <div v-show="pageStatus!='busy'" class="bodyContent" style="display:none">
+
+                <!-- field: NUMBER OF SHOWCASE BOOK RECORDS TO CREATE -->
+                <dl class="dataType_wholeNumber">
+                    <dt><span v-if="fields.numberOfShowcaseBookRecordsToCreate.required">*</span>{{fields.numberOfShowcaseBookRecordsToCreate.label}}</dt>
+                    <dd>
+                        <div>
+                            <input id="field_numberOfShowcaseBookRecordsToCreate" :disabled="pageStatus=='busy'"
+                                v-on:keyup.enter="onEnterClick()" @keydown="keyWasPressed" @keyup="keyWasPressed"
+                                v-model="fields.numberOfShowcaseBookRecordsToCreate.value" class="form-control dataType_wholeNumber_control" />
+                        </div>
+                        <!-- field info, examples, and error messags -->
+                        <div>
+                            <small v-if="fields.numberOfShowcaseBookRecordsToCreate.errorMessage != ''" class="error">{{fields.numberOfShowcaseBookRecordsToCreate.errorMessage}}
+                            </small>
+                            <small v-if="fields.numberOfShowcaseBookRecordsToCreate.info" class="info">{{fields.numberOfShowcaseBookRecordsToCreate.info}}
+                            </small>
+                            <small v-if="fields.numberOfShowcaseBookRecordsToCreate.example" class="example"><span
+                                    class="exampleLabel">Example:</span>
+                                <span class="exampleText">{{fields.numberOfShowcaseBookRecordsToCreate.example}}</span>
+                            </small>
+                        </div>
+                    </dd>
+                </dl>
+
+
+
+                <!-- form notes -->
+                <div class="pull-left formNotes">
+                    <span v-show="thereAreRequiredFields()" class="requiredFieldMarker">* required field</span>
+                </div>
+
+                <!-- submit button -->
+                <div class="pull-right">
+                    <button id="buttonSubmit" :disabled="formSubmitButtonShouldBeDisabled()" @click="processForm()"
+                        class="btn btn-default formButton">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            clientSideEmptyFieldChecking: false,
+            pageStatus: 'ready',
+            formStatus: '',
+            formMessage: '',
+            fields: {
+                numberOfShowcaseBookRecordsToCreate: {
+                    label: '',
+                    dataTypeIdCode: '',
+                    value: '',
+                    info: '',
+                    example: '',
+                    required: false,
+                    errorStatus: '',
+                    errorMessage: '',
+                    displayStatus: '',
+                    choices: '',
+                    choiceSelector: ''
+                }
+            }
+        },
+        methods: {
+            initialize: function () {
+                $('.bodyContent').show();
+                $('.messageArea').show();
+                this.loadPageData();
+            },
+            loadPageData: function () {
+                this.pageStatus = 'busy';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'controllerShowcaseDpDataLoader',
+                    data: {
+                        action: 'loadPageData'
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+                    that.fields = response.data.fields;
+                    that.focusField(formFocusedFieldIdCode);
+                    that.pageStatus = 'ready';
+                }).catch(function (error) {
+                    that.pageStatus = 'failed';
+                });
+            },
+            processForm: function () {
+                this.pageStatus = 'busy';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'controllerShowcaseDpDataLoader',
+                    data: {
+                        action: 'processForm',
+                        fields: that.fields
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+                    that.formStatus = response.formStatus;
+                    that.formMessage = response.formMessage;
+                    that.fields = response.data.fields;
+                    that.focusField(formFocusedFieldIdCode);
+                    that.pageStatus = 'ready';
+                }).catch(function (error) {
+                    that.formMessageKind = 'error';
+                    that.formMessage = 'An unknown error occurred.';
+                });
+            },
+            onEnterClick: function () {
+                $('#buttonSubmit').click();
+            },
+            qstr_isEmpty: function (line) {
+                return qstr.isEmpty(line);
+            },
+            formSubmitButtonShouldBeDisabled: function () {
+                if (!this.clientSideEmptyFieldChecking) {
+                    return false;
+                }
+                if (this.pageStatus == 'busy') {
+                    return true;
+                }
+                for (const key in this.fields) {
+                    const field = this.fields[key];
+                    if (field.required && qstr.isEmpty(field.value)) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            keyWasPressed: function (e) {
+
+                if (e.keyCode === 13 && e.ctrlKey) {
+                    this.onEnterClick();
+                }
+
+                this.formSubmitButtonShouldBeDisabled();
+
+                let thereAreErrors = false;
+
+                //empty fields
+                for (const idCode in this.fields) {
+                    const field = this.fields[idCode];
+                    if (field.required && qstr.isEmpty(field.value)) {
+                        this.setDataInFields(idCode, 'errorMessage',
+                            'This value is required and cannot be empty.');
+                        thereAreErrors = true;
+                    } else {
+                        this.setDataInFields(idCode, 'errorMessage', '');
+                    }
+                }
+            },
+            focusField: function (fieldIdCode) {
+                setTimeout(function () {
+                    $('#field_' + fieldIdCode).focus();
+                }, 50);
+            },
+            setDataInFields: function (idCode, property, value) {
+                const field = `${idCode}.${property}`;
+                _.set(this.fields, field, value)
+
+            },
+            thereAreRequiredFields: function () {
+                for (const idCode in this.fields) {
+                    const field = this.fields[idCode];
+                    if (field.required) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            switchChoiceSelector: function (field) {
+                switch (field.choiceSelector) {
+                    case 'radioVertical':
+                        field.choiceSelector = 'dropdown';
+                        break;
+                    case 'dropdown':
+                        field.choiceSelector = 'radioHorizontal';
+                        break;
+                    case 'radioHorizontal':
+                    default:
+                        field.choiceSelector = 'radioVertical';
+                        break;
+                }
+            }
+        }
+    });
+    app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

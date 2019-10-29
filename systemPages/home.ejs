@@ -1,0 +1,57 @@
+<%- include(data.system_layout_header)  %>
+<%
+//DYNAMIC_VARIABLE:developer=no
+//DYNAMIC_VARIABLE:layout=bootstrap
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,bootbox,lodash
+%>
+
+<div id="app" class="pageContent">
+
+	<h3 style="display:none">HOme</h3>
+
+	<div v-show="userData.login == 'anonymousUser'">{{message}}, please <a href="login">login</a>.</div>
+	<div v-show="userData.login != 'anonymousUser'">You are logged in.</div>
+
+
+	<div v-show="pageStatus == 'busy'"><i class="fa fa-spinner fa-pulse page_loading_spinner" aria-hidden="true"></i>
+	</div>
+
+</div>
+
+<script>
+	const app = new Vue({
+		el: '#app',
+		data: {
+			pageStatus: 'ready',
+			message: '',
+			userData: []
+		},
+		methods: {
+			initialize: function () {
+				$('.bodyContent').show();
+				this.loadPageData();
+			},
+			loadPageData: function () {
+				this.pageStatus = 'busy';
+				const that = this;
+				axios({
+					method: 'post',
+					url: 'controllerHome',
+					data: {
+						action: 'loadPageData'
+					}
+				}).then(function (responseObject) {
+					const response = qsys.getResponse(responseObject);
+					that.message = response.data.message;
+					that.userData = response.data.userData;
+					that.pageStatus = 'ready';
+				}).catch(function (error) {
+					that.pageStatus = 'failed';
+				});
+			}
+		}
+	});
+	app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

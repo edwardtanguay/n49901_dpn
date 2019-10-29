@@ -1,0 +1,21 @@
+body {
+  padding: 10px;
+}
+span.pageSelected {
+  font-weight: bold;
+}
+div.system_page_menu ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+div.system_page_menu ul li {
+  float: left;
+}
+div.system_page_menu ul li::after {
+  content: " |\00a0";
+}
+div.system_page_menu ul li:last-child:after {
+  content: "";
+}

@@ -1,0 +1,131 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+
+<style>
+	h6 {
+		margin: 20px 0 5px 0;
+	}
+
+	table.tableMain td {
+		vertical-align: top;
+	}
+
+	table.tableViewSmartphone td div.recordTitle {
+		font-style: italic;
+	}
+
+	/* smartphone view */
+	@media (max-width: 577px) {
+		.mainGraphic {
+			width: 100%;
+		}
+	}
+
+	/* tablet/computer view */
+	@media (min-width: 578px) {
+		.mainGraphic {
+			box-shadow: 10px 10px 5px grey;
+		}
+	}
+</style>
+
+<div id="app" class="pageContent">
+
+	<h3>Showcase Mobile Development</h3>
+
+	<!--SMARTPHONE VIEW-->
+	<div class="d-inline d-sm-none">
+		<div v-show=" records.length> 0 && pageStatus == 'ready'">
+			<table class="tableViewSmartphone tableMain table-bordered table-striped">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Book</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-for="record in records">
+						<td>{{record.id}}</td>
+						<td>
+							<div class="recordTitle">{{record.title}}</div>
+							<div>{{record.author}}</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<!--COMPUTER/TABLET VIEW-->
+	<div class="d-none d-sm-inline">
+		<div v-show=" records.length> 0 && pageStatus == 'ready'">
+			<table class="tableViewComputer tableMain table-bordered table-striped">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Title</th>
+						<th>Author</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-for="record in records">
+						<td>{{record.id}}</td>
+						<td>{{record.title}}</td>
+						<td>{{record.author}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<h6>Info Graphic:</h6>
+	<img class="mainGraphic" src="systemImages/showcases/mobileDevelopment/testGraphic.png" />
+
+
+	<div v-show="records.length == 0 && pageStatus == 'ready'">
+		No records.
+	</div>
+
+	<div v-show="pageStatus == 'busy'"><i class="fa fa-spinner fa-pulse page_loading_spinner" aria-hidden="true"></i>
+	</div>
+
+</div>
+
+<script>
+	const app = new Vue({
+		el: '#app',
+		data: {
+			pageStatus: 'ready',
+			records: []
+		},
+		methods: {
+			initialize: function () {
+				$('.bodyContent').show();
+				this.loadPageData();
+			},
+			loadPageData: function () {
+				this.pageStatus = 'busy';
+				const that = this;
+				axios({
+					method: 'post',
+					url: 'controllerShowcaseMobileDevelopment',
+					data: {
+						action: 'loadPageData'
+					}
+				}).then(function (responseObject) {
+					const response = qsys.getResponse(responseObject);
+					that.records = response.data.records;
+					that.pageStatus = 'ready';
+				}).catch(function (error) {
+					that.pageStatus = 'failed';
+				});
+			}
+		}
+	});
+	app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

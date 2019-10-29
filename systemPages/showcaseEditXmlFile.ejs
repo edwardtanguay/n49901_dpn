@@ -1,0 +1,80 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+<style>
+    .tiny {
+        font-size: 9px;
+    }
+
+    .customTable {
+        width: auto;
+    }
+
+    td.rightAligned {
+        text-align: right;
+    }
+</style>
+
+<div id="app">
+
+    <h3>Showcase: Edit XML File</h3>
+
+    <div id="area_loaded" v-show="status=='ready'">
+
+        <ul>
+            <li v-for="item in resources">{{item.key}}</li>
+        </ul>
+
+    </div>
+    <div id="area_loading" v-show="status=='loading'">
+        <i class="fa fa-spinner fa-pulse page_loading_spinner" aria-hidden="true"></i>
+    </div>
+
+</div>
+
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            status: 'ready',
+            searchText: '',
+            json: {},
+            resources: []
+        },
+        methods: {
+            loadData: function () {
+                this.status = 'loading';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'controllerShowcaseEditXmlFile',
+                    data: {
+                        action: 'loadPageData'
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    that.json = response.data.json;
+                    that.resources = response.data.resources;
+                    // console.log(that.json.resources);
+                    // console.log(that.json.resources.res);
+                    // console.log('before');
+                    // _.forIn(that.json.resources.res, function (value, key) {
+                    //     console.log(key, value);
+                    // });
+                    // for (const item in json.resources.res) {
+                    //     console.log('here');
+                    // }
+                    console.log('after');
+                    that.status = 'ready';
+                }).catch(function (error) {
+                    that.status = 'failed';
+                });
+            }
+        }
+    });
+    app.loadData();
+</script>
+
+<%- include(data.system_layout_footer)  %>

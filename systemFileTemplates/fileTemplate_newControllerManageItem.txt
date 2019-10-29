@@ -1,0 +1,85 @@
+"use strict"
+const Controller = require('./controller');
+const DpDataLoader = require('../systemClasses/dpDataLoader');
+const qsys = require('../qtools/qsys');
+const qdev = require('../qtools/qdev');
+const qstr = require('../qtools/qstr');
+const qmat = require('../qtools/qmat');
+const @@pascalItemTypeIdCode = require('../systemItems/@@singularItemTypeIdCode');
+const dpod = require('../system/dpod');
+const System = require('../system/system');
+
+class @@controllerClassName extends Controller {
+    constructor(request, response) {
+        super(request, response);
+    }
+
+    action_loadPageData() {
+        const command = this.requestData.command;
+        const id = this.requestData.id;
+
+        this.responseData = {};
+        this.responseStatus = 'loaded';
+
+		//load field data from item type
+		const @@itemTypeIdCode = System.instantiateItems('@@itemTypeIdCode');
+		this.formTypeDefinitionFieldBlock = @@itemTypeIdCode.getFormTypeDefinitionFieldBlock();
+
+        this.prepareFields();
+
+        @@fieldDecorationCodeBlock
+        
+        if (qstr.isInList(command, 'edit, copy')) {
+            const that = this;
+            dpod.fetchItem(`@@singularItemTypeIdCode where id = ${id}`, function (item) {
+                if (item == null) {
+                    that.formStatus = 'error';
+                    that.formMessage = `Item not found.`;
+                } else {
+@@responseDataBlock                    
+                }
+                that.sendResponse();
+            });
+        } else {
+            this.sendResponse();
+        }
+    }
+
+    action_processForm() {
+        const isValid = this.validateForm();
+        if (isValid) {
+            const systemCommand = this.requestData.command;
+            const id = this.requestData.id;
+
+@@defineFieldValueLines
+
+            const @@singularItemTypeIdCode = new @@pascalItemTypeIdCode();
+            if (systemCommand == 'edit') {
+                @@singularItemTypeIdCode.id = id;
+            }
+
+@@definePropertyLines            
+
+            @@singularItemTypeIdCode.save();
+
+            this.formStatus = ``;
+            this.formMessage = ``;
+
+            this.sendResponse();
+        }
+    }
+
+    action_parseMarkdown() {
+        const originalText = this.getValue('originalText').trim();
+        this.responseData.parsedText = qstr.parseMarkDown(originalText);
+        this.sendResponse();
+    }
+
+    action_parseOutline() {
+        const originalText = this.getValue('originalText').trim();
+        this.responseData.parsedText = qstr.parseOutline(originalText, '@@itemTypeIdCode');
+        this.sendResponse();
+    }
+}
+
+module.exports = @@controllerClassName

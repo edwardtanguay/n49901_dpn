@@ -1,0 +1,39 @@
+"use strict"
+const Controller = require('./controller');
+const DpDataLoader = require('../systemClasses/dpDataLoader');
+const qsys = require('../qtools/qsys');
+const qdev = require('../qtools/qdev');
+const qdat = require('../qtools/qdat');
+const qstr = require('../qtools/qstr');
+const dpod = require('../system/dpod');
+const System = require('../system/system');
+
+class @@controllerClassName extends Controller {
+	constructor(request, response) {
+		super(request, response);
+	}
+
+	action_loadPageData() {
+		const dpDataLoader = new DpDataLoader();
+@@dpDataLoaderBlock
+		const that = this;
+		dpDataLoader.load(function (data) {
+
+			const searchDataitems = [];
+
+@@searchObjectBuildingCodeBlocks
+
+			that.responseData.searchDataitems = searchDataitems;
+
+			//that.responseData.userIsCurrentlyLoggedIn = qsys.userIsCurrentlyLoggedIn(that.request);
+
+			qsys.currentUserData(that.request, function (userData) {
+				that.responseData.userData = userData;
+				that.sendResponse();
+			});
+		});
+	}
+
+}
+
+module.exports = @@controllerClassName

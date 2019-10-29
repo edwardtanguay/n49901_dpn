@@ -1,0 +1,71 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+<div id="app" class="pageContent">
+
+    <h3>@@pageTitle</h3>
+    
+    <div v-show="records.length > 0 && pageStatus == 'ready'">
+        <table class="table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th v-for="(fieldValue, fieldIdCode) in records[0]">
+                        {{ fieldIdCode }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="record in records">
+                    <td v-for="fieldValue of record">
+                        {{fieldValue}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div v-show="records.length == 0 && pageStatus == 'ready'">
+        No records.
+    </div>
+    
+    <div v-show="pageStatus == 'busy'"><i class="fa fa-spinner fa-pulse page_loading_spinner" aria-hidden="true"></i></div>
+
+</div>
+
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            pageStatus: 'ready',
+            records: []
+        },
+        methods: {
+            initialize: function () {
+                $('.bodyContent').show();
+                this.loadPageData();
+            },
+            loadPageData: function () {
+                this.pageStatus = 'busy';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: '@@controllerIdCode',
+                    data: {
+                        action: 'loadPageData'
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    that.records = response.data.records;
+                    that.pageStatus = 'ready';
+                }).catch(function (error) {
+                    that.pageStatus = 'failed';
+                });
+            }
+        }
+    });
+    app.initialize();
+</script>
+
+<%- include(data.system_layout_footer)  %>

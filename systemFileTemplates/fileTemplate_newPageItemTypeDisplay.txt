@@ -1,0 +1,392 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,bootbox,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+
+<div id="app" style="display:none" class="displayItemsPage">
+    <div>
+		<div id="area_loaded" v-show="status=='ready'">
+			<div v-if="!permalinkIsShowing()" class="headerAll">
+				<h5>@@itemTypeTitlePlural</h5>
+			</div>
+			<div class="itemTypeManagementArea">
+				<div class="infoBox" v-if="!pageState.id">
+					<input class="form-control searchBox pull-left" v-model="pageState.searchText"
+						:disabled="pageStatus == 'busy' || !thereAreSomeRecords()" v-on:keyup="filterItems()"
+						placeholder="search" /> <i v-show="pageState.searchText" @click="clearSearchField()"
+						class="fa fa-times pull-left iconClearSearch"></i>
+					<div class="clear"></div>
+					<ul>
+						<li v-show="thereAreSomeRecords()" v-if="filtered@@itemTypePascalPlural.length == all@@itemTypePascalPlural.length">
+							Showing <span class="allItemsShown">ALL
+								{{all@@itemTypePascalPlural.length}}</span> @@itemTypeTextPlural.</li>
+						<li v-show="!thereAreSomeRecords()">There are currently no @@itemTypeTextPlural.</li>
+						<li v-if="filtered@@itemTypePascalPlural.length != all@@itemTypePascalPlural.length">Showing
+							{{filtered@@itemTypePascalPlural.length}} of {{all@@itemTypePascalPlural.length}} @@itemTypeTextPlural.</li>
+
+						<li v-show="!thereAreSomeRecords()">
+							<span @click="manage_add()" class="addItem">Add @@itemTypeTitleSingular</span> or add multiple items in <a
+								href="batchImport">Batch Import</a>.
+						</li>
+					</ul>
+
+				</div>
+
+				<!-- item -->
+				<div class="item" :class="{highlighted: permalinkIsShowing()}" v-for="item in filtered@@itemTypePascalPlural">
+					<div class="header prohibitSelectionClickable" @click="toggleBodyStatus(item)">
+						<div class=pull-left>
+							<div class="category">{{showCategory(item)}}</div>
+							<div class="title">{{item.@@identifyingField}}</div>
+						</div>
+						<div v-show="showTheBody(item)" class="manageIconArea pull-right">
+							<i v-if="userIsDeveloper()" class="fa fa-list manageIcon" title="display editing text block to copy" v-on:click.stop
+								@click="manage_displayItemTextBlock(item)"></i>
+							<i v-if="!permalinkIsShowing()"
+								class="fa fa-link fa-rotate-90 manageIcon manageIconPermalink" title="set as permalink"
+								v-on:click.stop @click="manage_permalink(item)"></i>
+							<i v-if="userIsDeveloper()" class="fa fa-pencil manageIcon" title="edit this item" v-on:click.stop
+								@click="manage_edit(item)"></i>
+							<i v-if="userIsDeveloper()" class="fa fa-plus manageIcon" title="add new item" v-on:click.stop
+								@click="manage_add(item)"></i>
+							<i v-if="userIsDeveloper()" class="fa fa-plus-square manageIcon" title="clone this item" v-on:click.stop
+								@click="manage_copy(item)"></i>
+							<i v-if="userIsDeveloper()" class="fa fa-trash-o manageIcon" title="delete this item" v-on:click.stop
+								@click="manage_delete(item)"></i>
+						</div>
+						<div class="clear"></div>
+					</div>
+					<div class="body" v-show="showTheBody(item)">
+						<div v-show="item.displayItemTextBlockAreaStatus == 'show'" class="displayItemTextBlockArea">
+							<textarea :id="'itemTextBlock' + item.id" class="form-control">{{item.itemTextBlock}}</textarea>
+						</div>
+						<div v-html="item.htmlBody"></div>
+						<div style="display:none" v-html="item.debuggingInfo"></div>
+					</div>
+				</div>
+				<div v-if="permalinkIsShowing()" class="headerPermalink">
+					<h5><span @click="switchToViewAll()" class="showAllItems">view all {{all@@itemTypePascalPlural.length}} @@itemTypeTextSingular items</span>
+					</h5>
+				</div>
+
+			</div>
+
+		</div>
+		<div id="area_loading" v-show="status=='loading'">
+			<i class="fa fa-spinner fa-pulse page_loading_spinner" aria-hidden="true"></i>
+		</div>	
+	</div>
+
+    <script>
+        const app = new Vue({
+            el: '#app',
+            data: {
+                status: 'ready',
+                all@@itemTypePascalPlural: [],
+                filtered@@itemTypePascalPlural: [],
+                viewport: {
+                    height: 0,
+                    width: 0,
+                    device: '',
+                    previousDevice: ''
+                },
+                pageStatus: 'busy',
+                pageState: {
+                    searchText: '',
+                    openItemIds: [],
+                    id: ''
+                },
+                searchFieldList: '@@searchFieldList',
+                permalinkItem: {},
+                userData: {
+                    login: '',
+                    accessGroups: ''
+                }
+            },
+            created() {
+                window.addEventListener("resize", this.recalculateViewportSizes);
+            },
+            destroyed() {
+                window.removeEventListener("resize", this.recalculateViewportSizes);
+            },
+            methods: {
+                getComputerPageState: function () {
+                    return {
+                        searchText: '',
+                        openItemIds: '',
+                        id: ''
+                    };
+                },
+                getSmartphonePageState: function () {
+                    return {
+                        searchText: '',
+                        openItemIds: '',
+                        id: ''
+                    };
+                },
+                setDefaultPageState: function () {
+                    if (this.viewport.device == 'computer') {
+                        this.pageState = this.getComputerPageState();
+                    } else {
+                        this.pageState = this.getSmartphonePageState();
+                    }
+                },
+                initialize: function () {
+                    $("#app").fadeIn(100);                    
+                    this.determineViewPort();
+                    this.setDefaultPageState();
+                    this.overridePageStateWithUrlState();
+                    this.loadData();
+
+                    // force initial view
+                    if (this.viewport.device == 'smartphone') {
+                        this.setViewportToSmartphone();
+                    } else {
+                        this.setViewportToComputer();
+                    }
+
+                    this.pageStatus = 'ready';
+                    this.refreshUrlFromPageState();
+                },
+                overridePageStateWithUrlState: function () {
+                    const url_searchText = qsys.getParameterValueFromUrl('searchText');
+                    if (!qstr.isEmpty(url_searchText)) {
+                        this.pageState.searchText = url_searchText;
+                    }
+                    const url_openItemIds = qsys.getParameterValueFromUrl('openItemIds');
+                    if (!qstr.isEmpty(url_openItemIds)) {
+                        this.pageState.openItemIds = url_openItemIds;
+                    }
+                    const url_id = qsys.getParameterValueFromUrl('id');
+                    if (!qstr.isEmpty(url_id)) {
+                        this.pageState.id = url_id;
+                    }
+                },
+                loadData: function () {
+                    this.status = 'loading';
+                    const that = this;
+                    axios({
+                        method: 'post',
+                        url: '@@controllerIdCode',
+                        data: {
+                            action: 'loadPageData'
+                        }
+                    }).then(function (responseObject) {
+                        const response = qsys.getResponse(responseObject);
+                        that.all@@itemTypePascalPlural = response.data.@@itemTypeCamelPlural;
+                        that.userData = response.data.userData;
+
+                        for (const @@itemTypeCamelSingular of that.all@@itemTypePascalPlural) {
+                            @@itemTypeCamelSingular.bodyStatus = 'hide';
+                            @@itemTypeCamelSingular.displayItemTextBlockAreaStatus = 'hide';
+                        }
+                        that.filterItems();
+                        that.focusSearch();
+
+                        that.openUpItemsBasedOnPageState();
+                        that.switchStateToPermalinkIfNecessary();
+
+                        that.status = 'ready';
+                    }).catch(function (error) {
+                        that.status = 'failed';
+                    });
+                },
+                openUpItemsBasedOnPageState: function () {
+                    const openItemIds = qstr.getIntegerArrayFromList(this.pageState.openItemIds);
+                    for (const @@itemTypeCamelSingular of this.filtered@@itemTypePascalPlural) {
+                        if (openItemIds.includes( @@itemTypeCamelSingular.id)) {
+                             @@itemTypeCamelSingular.bodyStatus = 'show';
+                        }
+                    }
+                },
+                focusSearch: function () {
+                    setTimeout(function () {
+                        $('.searchBox').focus();
+                    }, 20);
+                },
+                filterItems: function () {
+                    const sortedField = 'id';
+                    this.filtered@@itemTypePascalPlural = qarr.multisort(this.all@@itemTypePascalPlural.filter(item => this.includeInSearchFilter(
+                        item)), ['id'], ['desc']);
+                    this.refreshUrlFromPageState();
+                },
+                includeInSearchFilter: function (item) {
+                    const parts = qstr.breakIntoParts(this.pageState.searchText, ' ');
+                    for (part of parts) {
+                        let foundInPart = false;
+                        const searchBlock = this.getSearchBlockText(item);
+                        if (searchBlock.toUpperCase().includes(part.toUpperCase())) {
+                            foundInPart = true;
+                        }
+                        if (!foundInPart) {
+                            return false;
+                        }
+                    }
+                    return true;
+                },
+                getSearchBlockText(item) {
+                    let r = '';
+                    const searchFields = qstr.breakIntoParts(this.searchFieldList, ',');
+                    for (const searchField of searchFields) {
+                        r += item[searchField] + '§';
+                    }
+                    return r;
+                },
+                determineViewPort() {
+                    this.viewport.width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+                    this.viewport.height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+                    this.viewport.device = this.viewport.width > 768 ? 'computer' : 'smartphone';
+                },
+                recalculateViewportSizes(e) {
+                    this.determineViewPort();
+                    if (this.viewport.previousDevice == 'computer' && this.viewport.device == 'smartphone') {
+                        this.setViewportToSmartphone();
+                    }
+                    if (this.viewport.previousDevice == 'smartphone' && this.viewport.device == 'computer') {
+                        this.setViewportToComputer();
+                    }
+                    this.viewport.previousDevice = this.viewport.device;
+                },
+                setViewportToSmartphone() {
+                    this.refreshUrlFromPageState();
+                },
+                setViewportToComputer() {
+                    this.refreshUrlFromPageState();
+                },
+                notBusy() {
+                    return this.pageStatus != 'busy';
+                },
+                buildManageItemUrl(command, id) {
+                    const returnUrl = qsys.getPageAndParametersFromUrl('@@pageIdCode');
+                    const encodedReturnUrl = qsys.encodeForUrlPassing(returnUrl);
+                    const targetUrl =
+                        `manage@@itemTypePascalSingular?returnUrl=${encodedReturnUrl}&command=${command}&id=${id}`;
+                    return targetUrl;
+                },
+                manage_permalink(item) {
+                    const permalinkUrl = `@@pageIdCode?id=${item.id}`;
+                    qsys.gotoPage(permalinkUrl);
+                },   
+                manage_displayItemTextBlock(item) {
+                    item.displayItemTextBlockAreaStatus = item.displayItemTextBlockAreaStatus == 'hide' ? 'show' : 'hide';
+					setTimeout(function () {
+						document.getElementById('itemTextBlock' + item.id).select();
+					}, 100);					
+                    this.$forceUpdate();
+                },             
+                manage_edit(item) {
+                    if (this.notBusy()) {
+                        const targetUrl = this.buildManageItemUrl('edit', item.id);
+                        qsys.gotoPage(targetUrl);
+                    }
+                },
+                manage_add(item = null) {
+                    if (this.notBusy()) {
+                        let id = 0;
+                        if (item != null) {
+                            id = item.id;
+                        }
+                        const targetUrl = this.buildManageItemUrl('add', id);
+                        qsys.gotoPage(targetUrl);
+                    }
+                },
+                manage_copy(item) {
+                    if (this.notBusy()) {
+                        const targetUrl = this.buildManageItemUrl('copy', item.id);
+                        qsys.gotoPage(targetUrl);
+                    }
+                },
+                manage_delete(item) {
+                    if (this.notBusy()) {
+                        const that = this;
+                        bootbox.confirm({
+                            size: "small",
+                            message: `Are you sure you want to delete <b>${item.@@identifyingField}</b>?`,
+                            callback: function (confirmed) {
+                                if (confirmed) {
+                                    that.pageStatus = 'busy';
+                                    axios({
+                                        method: 'post',
+                                        url: '@@controllerIdCode',
+                                        data: {
+                                            action: 'deleteItem',
+                                            item: item
+                                        }
+                                    }).then(function (responseObject) {
+                                        const response = qsys.getResponse(responseObject);
+                                        that.all@@itemTypePascalPlural = that.all@@itemTypePascalPlural.filter(
+                                            function (innerItem) {
+                                                return innerItem.id != item.id
+                                            });
+                                        that.filterItems();
+                                        that.focusSearch();
+                                        that.pageStatus = 'ready';
+                                    }).catch(function (error) {
+                                        console.log(error)
+                                    });
+                                }
+                            }
+                        });
+                    }
+                },
+                thereAreSomeRecords: function () {
+                    return this.all@@itemTypePascalPlural.length > 0;
+                },
+                refreshUrlFromPageState: function () {
+                    qsys.changeUrl('@@pageIdCode', this.pageState);
+                },
+                toggleBodyStatus: function (item) {
+                    item.bodyStatus = item.bodyStatus == 'show' ? 'hide' : 'show';
+                    this.$forceUpdate();
+                    this.updateOpenItemIds(item);
+                    this.refreshUrlFromPageState();
+                },
+                updateOpenItemIds: function (item) { 
+                    let openItemIds = qstr.getIntegerArrayFromList(this.pageState.openItemIds);
+                    if (item.bodyStatus == 'show') {
+                        openItemIds.push(item.id);
+                    } else {
+                        openItemIds = openItemIds.filter(function (id) { return id !== item.id })
+                    }
+                    this.pageState.openItemIds = openItemIds.join(',');
+                },
+                showTheBody: function (item) {
+                    return this.filtered@@itemTypePascalPlural.length == 1 || item.bodyStatus == 'show';
+                },
+                showCategory: function (item) {
+                    return '@@itemTypeTitleSingular';
+                },
+                clearSearchField: function () {
+                    this.pageState.searchText = '';
+                    this.filterItems();
+                    that.focusSearch();
+                },
+                getItemBasedOnId: function (id) {
+                    return this.all@@itemTypePascalPlural.find(item => item.id == id);
+                },
+                switchStateToPermalinkIfNecessary: function () {
+                    if (this.pageState.id) {
+                        this.permalinkItem = this.getItemBasedOnId(this.pageState.id);
+                        this.filtered@@itemTypePascalPlural = this.all@@itemTypePascalPlural.filter(item => item.id == this.pageState.id);
+                    }
+                },
+                permalinkIsShowing: function () {
+                    return this.pageState.id;
+                },
+                switchToViewAll: function () {
+                    this.pageState.id = '';
+                    this.refreshUrlFromPageState();
+                    this.filterItems();
+                    this.focusSearch();
+                    this.openUpItemsBasedOnPageState();
+                },
+                userIsDeveloper: function () {
+                    return qstr.atLeastOneTermMatchesInLists(this.userData.accessGroups, 'developers');
+                }
+            }
+        });
+        app.initialize();
+    </script>
+
+    <%- include(data.system_layout_footer)  %>

@@ -1,0 +1,25 @@
+"use strict"
+const Item = require('./item');
+const @@pluralPascalNotation = require('./@@pluralCamelNotation');
+
+class @@singularPascalNotation extends Item {
+    constructor(id) {
+        super(id);
+        this.items = new @@pluralPascalNotation();
+        this.loadItem();
+    }
+
+    static instantiateWithRecord(record) {
+        const item = new @@singularPascalNotation();
+@@instantiateWithRecordBlock
+        return item;
+    }
+
+    static instantiateWithObjectRecord(objectRecord) {
+        const item = new @@singularPascalNotation();
+@@instantiateWithObjectRecordBlock
+        return item;
+    }
+}
+
+module.exports = @@singularPascalNotation

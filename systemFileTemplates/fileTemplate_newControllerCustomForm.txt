@@ -1,0 +1,64 @@
+"use strict"
+const Controller = require('./controller');
+const DpDataLoader = require('../systemClasses/dpDataLoader');
+const qsys = require('../qtools/qsys');
+const qdev = require('../qtools/qdev');
+const qstr = require('../qtools/qstr');
+const ShowcaseBook = require('../systemItems/showcaseBook');
+
+class @@controllerClassName extends Controller {
+    constructor(request, response) {
+        super(request, response);
+    }
+    
+
+    customFormValidation(field, errors) {
+        // if (field.idCode == 'title' && qstr.contains(field.value, '.')) {
+        //     this.addFormError(field, 'should not contain a period character');
+        // }
+    }
+
+    action_loadPageData() {
+        this.responseStatus = 'loaded';
+        this.formTypeDefinitionFieldBlock = `
+@@formTypeDefinitionFieldBlock       
+        `;
+        this.responseData = {};
+
+        this.prepareFields();
+
+        @@fieldDecorationCodeBlock
+        
+        //this.responseData.fields.title.value = `putDefaultValueHere`;
+        this.sendResponse();
+    }
+
+    action_processForm() {
+        const isValid = this.validateForm();
+        if (isValid) {
+
+@@codeBlockDefineLocalVariables
+            
+            this.formStatus = 'success';
+            this.formMessage = `@@codeBlockVariableValueLine`;
+
+            this.sendResponse();
+            
+        }
+    }
+
+    action_parseMarkdown() {
+        const originalText = this.getValue('originalText').trim();
+        this.responseData.parsedText = qstr.parseMarkDown(originalText);
+        this.sendResponse();
+    }
+
+    action_parseOutline() {
+        const originalText = this.getValue('originalText').trim();
+        this.responseData.parsedText = qstr.parseOutline(originalText);
+        this.sendResponse();
+    }
+
+}
+
+module.exports = @@controllerClassName

@@ -1,0 +1,154 @@
+"use strict"
+const Controller = require('./controller');
+const DpDataLoader = require('../systemClasses/dpDataLoader');
+const qsys = require('../qtools/qsys');
+const qdev = require('../qtools/qdev');
+const qstr = require('../qtools/qstr');
+const ShowcaseBook = require('../systemItems/showcaseBook');
+
+class @@controllerClassName extends Controller {
+    constructor(request, response) {
+        super(request, response);
+    }
+
+    customFormValidation(field, errors) {
+        if (field.idCode == 'title' && qstr.contains(field.value, '.')) {
+            this.addFormError(field, 'should not contain a period character');
+        }
+        if (field.idCode == 'title' && qstr.contains(field.value, ',')) {
+            this.addFormError(field, 'should not contain a comma');
+        }
+    }
+
+    action_loadPageData() {
+        const dpDataLoader = new DpDataLoader();
+        dpDataLoader.getRecordWithSql('showcaseBooks', 'SELECT * FROM showcaseBooks WHERE id = 341');
+        const that = this;
+        dpDataLoader.load(function (data) {
+            const objectRecord = qsys.getObjectRecordFromData(data, 'showcaseBooks');
+            that.responseStatus = 'loaded';
+            that.responseData = {
+                fields: {
+                    id: {
+                        label: 'ID',
+                        dataTypeIdCode: 'id',
+                        value: objectRecord.id,
+                        info: '',
+                        example: '',
+                        required: false,
+                        errorStatus: '',
+                        errorMessage: '',
+                        displayStatus: 'hide',
+                        choicesList: '',
+                        choiceSelector: ''
+                    },
+                    title: {
+                        label: 'Title',
+                        dataTypeIdCode: 'line',
+                        value: objectRecord.title,
+                        info: '',
+                        example: 'The Best of C#',
+                        required: true,
+                        errorStatus: '',
+                        errorMessage: '',
+                        displayStatus: 'show',
+                        choicesList: '',
+                        choiceSelector: ''
+                    },
+                    description: {
+                        label: 'Description',
+                        dataTypeIdCode: 'paragraph',
+                        value: objectRecord.description,
+                        info: 'The best length is 200 words or less.',
+                        example: '',
+                        required: false,
+                        errorStatus: '',
+                        errorMessage: '',
+                        displayStatus: 'show',
+                        choicesList: '',
+                        choiceSelector: ''
+                    },
+                    author: {
+                        label: 'Author', 
+                        dataTypeIdCode: 'line',
+                        value: objectRecord.author,
+                        info: 'Please enter in format: FirstName LastName.',
+                        example: 'James Wright',
+                        required: false,
+                        errorStatus: '',
+                        errorMessage: '',
+                        displayStatus: 'show',
+                        choicesList: '',
+                        choiceSelector: ''
+                    },
+                    numberOfPages: {
+                        label: 'Number of Pages',
+                        dataTypeIdCode: 'numberOfBookPages',
+                        value: objectRecord.numberOfPages,
+                        info: '',
+                        example: '499',
+                        required: true,
+                        errorStatus: '',
+                        errorMessage: '',
+                        displayStatus: 'show',
+                        choicesList: '',
+                        choiceSelector: ''
+                    },
+                    kind: {
+                        label: 'Kind',
+                        dataTypeIdCode: 'choice',
+                        value: objectRecord.kind,
+                        info: '',
+                        example: '',
+                        required: true,
+                        errorStatus: '',
+                        errorMessage: '',
+                        displayStatus: 'show',
+                        choicesList: 'Paperback|Hardcover|E-Book[ebook]',
+                        choiceSelector: 'radioVertical'
+                    },
+                    section: {
+                        label: 'Section',
+                        dataTypeIdCode: 'choice',
+                        value: objectRecord.section,
+                        info: '',
+                        example: '',
+                        required: true,
+                        errorStatus: '',
+                        errorMessage: '',
+                        displayStatus: 'show',
+                        choicesList: 'Programming|Cooking|Travel|History|Philosophy',
+                        choiceSelector: 'radioVertical'
+                    }
+                }
+            };
+            that.prepareFields();
+            //this.responseData.fields.title.value = `putDefaultValueHere`;
+            that.sendResponse();
+        });
+    }
+
+    action_processForm() {
+        const isValid = this.validateForm();
+        if (isValid) {
+            const dpDataLoader = new DpDataLoader();
+            dpDataLoader.getRecordWithSql('showcaseBooks', `SELECT * FROM showcaseBooks WHERE id = ${this.requestData.fields.id.value}`);
+            const that = this;
+            dpDataLoader.load(function (data) {
+                const objectRecord = qsys.getObjectRecordFromData(data, 'showcaseBooks');
+                const item = ShowcaseBook.instantiateWithObjectRecord(objectRecord);
+                item.title = that.requestData.fields.title.value;
+                item.description = that.requestData.fields.description.value;
+                item.author = that.requestData.fields.author.value;
+                item.numberOfPages = that.requestData.fields.numberOfPages.value;
+                item.kind = that.requestData.fields.kind.value;
+                item.section = that.requestData.fields.section.value;
+                item.save();
+                that.sendResponse();
+            });
+        }
+    }
+
+}
+
+module.exports = @@controllerClassName
