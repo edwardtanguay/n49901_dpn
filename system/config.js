@@ -7,7 +7,6 @@ const config = require('../system/config');
 
 //** NOW WORKING ON ISSUE003
 
-
 // outputs debugging information to console, keeps developer logged in even after backend modifications to code
 exports.developing = function () {
 	return false;//DYNAMIC_LINE:configDeveloping
