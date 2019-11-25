@@ -1,7 +1,7 @@
 "use strict"
 const qstr = require('../qtools/qstr');
 const qdev = require('../qtools/qdev');
-const config_developer = require('../system/config_developer');
+const config_developer = require('../system_developer/config_developer');
 const config = require('../system/config');   
 
 // === manually-defined configs ===================

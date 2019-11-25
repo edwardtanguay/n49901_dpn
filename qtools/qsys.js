@@ -199,7 +199,7 @@ exports.deleteItemType = function (itemTypeIdCode) {
 }
 
 exports.logLocalDevUserOut = function () {
-	const dynamicPage = new DynamicFile('system/config_developer.js');
+	const dynamicPage = new DynamicFile('system_developer/config_developer.js');
 	dynamicPage.changeMarkerLineAndSave('defaultUserIdCode', "return 'anonymousUser';");
 	dynamicPage.changeMarkerLineAndSave('configDeveloping', "return false;");
 	qsys.sleep(3000); // wait for nodemon to restart
