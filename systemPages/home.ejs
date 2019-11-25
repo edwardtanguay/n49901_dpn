@@ -7,10 +7,10 @@
 
 <div id="app" class="pageContent">
 
-	<h3 style="display:none">HOme</h3>
+	<h3 style="display:none">Home</h3>
 
 	<div v-show="userData.login == 'anonymousUser'">{{message}}, please <a href="login">login</a>.</div>
-	<div v-show="userData.login != 'anonymousUser'">You are logged in.</div>
+	<div v-show="userData.login != 'anonymousUser'">You are logged in. Version {{niceVersion}}.</div>
 
 
 	<div v-show="pageStatus == 'busy'"><i class="fa fa-spinner fa-pulse page_loading_spinner" aria-hidden="true"></i>
@@ -24,7 +24,8 @@
 		data: {
 			pageStatus: 'ready',
 			message: '',
-			userData: []
+			userData: [],
+			niceVersion: ''
 		},
 		methods: {
 			initialize: function () {
@@ -43,6 +44,7 @@
 				}).then(function (responseObject) {
 					const response = qsys.getResponse(responseObject);
 					that.message = response.data.message;
+					that.niceVersion = response.data.niceVersion;
 					that.userData = response.data.userData;
 					that.pageStatus = 'ready';
 				}).catch(function (error) {

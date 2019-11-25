@@ -6,6 +6,7 @@ const qdev = require('../qtools/qdev');
 const qdat = require('../qtools/qdat');
 const qstr = require('../qtools/qstr');
 const dpod = require('../system/dpod');
+const config = require('../system/config');
 const System = require('../system/system');
 
 class ControllerHome extends Controller {
@@ -18,6 +19,10 @@ class ControllerHome extends Controller {
 		this.responseData = {};
 
 		this.responseData.message = 'Welcome to this site';
+		const version = config.dpnVersion();
+		const niceVersion = qsys.convertVersionIdCodeToNiceVersion(version);
+		this.responseData.niceVersion = niceVersion;
+
 
 		qsys.currentUserData(this.request, userData => {
 			this.responseData.userData = userData;
