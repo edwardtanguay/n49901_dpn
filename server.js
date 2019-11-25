@@ -63,7 +63,7 @@ app.get('*', function (request, response) {
 	//do not allow developing mode online
 	if (config.developing() && qsys.isOnline()) {
 
-		const dynamicPage = new DynamicFile('system/config.js');
+		const dynamicPage = new DynamicFile('system/config_developer.js');
 		dynamicPage.changeMarkerLineAndSave('defaultUserIdCode', "return 'anonymousUser';");
 		dynamicPage.changeMarkerLineAndSave('configDeveloping', "return false;");
 		throw new Error('online dev detected and fixed, restart node');

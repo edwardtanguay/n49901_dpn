@@ -57,7 +57,7 @@ class ControllerLogin extends Controller {
 
 					//when developer is logged in, we need him logged in by default so that when a file changes, the server restarts, and the developer is still logged in
 					if (qsys.siteLocation() == 'offline' && data.user.login == 'dev') {
-						const dynamicPage = new DynamicFile('system/config.js');
+						const dynamicPage = new DynamicFile('system/config_developer.js');
 						dynamicPage.changeMarkerLineAndSave('defaultUserIdCode', "return 'dev';");
 					}
 

@@ -1,16 +1,12 @@
 "use strict"
 const qstr = require('../qtools/qstr');
 const qdev = require('../qtools/qdev');
-const config = require('../system/config');
+const config_developer = require('../system/config_developer');
+const config = require('../system/config');   
 
 // === manually-defined configs ===================
 
 //** NOW WORKING ON ISSUE003
-
-// outputs debugging information to console, keeps developer logged in even after backend modifications to code
-exports.developing = function () {
-	return false;//DYNAMIC_LINE:configDeveloping
-}
 
 // enables site to be switched between "parked" (for copying) and "live" (for using) 
 exports.siteMode = function () {
@@ -179,10 +175,6 @@ exports.dynamicFileCodeAreaWordMarker = function () {
 	return 'DYNAMIC_CODE_AREA';
 }
 
-exports.defaultUserIdCode = function () {
-	return 'dev';//DYNAMIC_LINE:defaultUserIdCode
-}
-
 exports.environment = function () {
 	if (config.operatingSystem() == 'linux') {
 		return 'public';
@@ -195,5 +187,15 @@ exports.getUserIdCodeWhenItIsNotUnknownWhoOwnsRecord = function () {
 	return 'systemUnknown';
 }
 
+// remapped configs
+
+exports.developing = function () {
+	return config_developer.developing();
+}
+exports.defaultUserIdCode = function () {
+	return config_developer.defaultUserIdCode();
+}
+
 //this is used in showcaseMultistepAjaxProcess to change a file so that node has to restart
 const testVariable = '672438'; //DYNAMIC_LINE:testVariable
+
