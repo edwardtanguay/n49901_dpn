@@ -28,9 +28,11 @@ exports.debug = function (label, value) {
 		if (value === undefined) {
 			console.log(">>> " + label.toUpperCase() + " <<< " + file + ":" + line + " <<<< DEBUG <<<<<" + qdat.getCurrentDateTime());
 		} else {
-			console.log(">>> " + label.toUpperCase() + " = [" + value + "] <<< " + file + ":" + line + " <<<< DEBUG <<<<<" + qdat.getCurrentDateTime());
-			if (typeof (value) != 'string') {
-				//console.log(value);
+			if (typeof value === 'object' && value !== null) {
+				console.log(">>> " + label.toUpperCase() + " = [SEE OBJECT BELOW] <<< " + file + ":" + line + " <<<< DEBUG <<<<<" + qdat.getCurrentDateTime());
+				console.log(value);
+			} else {
+				console.log(">>> " + label.toUpperCase() + " = [" + value + "] <<< " + file + ":" + line + " <<<< DEBUG <<<<<" + qdat.getCurrentDateTime());
 			}
 		}
 	}
