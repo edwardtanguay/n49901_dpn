@@ -6,6 +6,7 @@ const qdat = require('../qtools/qdat');
 const qstr = require('../qtools/qstr');
 
 exports.debug = function (label, value) {
+	//new   
 
 	frame = stackTrace.get()[1];
 	file = path.basename(frame.getFileName());
