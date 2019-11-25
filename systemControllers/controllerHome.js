@@ -23,7 +23,6 @@ class ControllerHome extends Controller {
 		const niceVersion = qsys.convertVersionIdCodeToNiceVersion(version);
 		this.responseData.niceVersion = niceVersion;
 
-
 		qsys.currentUserData(this.request, userData => {
 			this.responseData.userData = userData;
 			this.sendResponse();
