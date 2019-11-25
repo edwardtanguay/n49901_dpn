@@ -131,12 +131,11 @@ exports.blankLineMarker = function () {
 	return 'nn';
 }
 
-// === generated configs ==========================
+// === other configs ==========================
 
 
-// NOTE: when publishing new version, update version number in database, not here
 exports.dpnVersion = function () {
-	return '00400';//DYNAMIC_LINE:dpnVersion
+	return '00402';
 }
 
 exports.systemSlash = function () {
