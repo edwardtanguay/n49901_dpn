@@ -2,7 +2,7 @@
 const qstr = require('../qtools/qstr');
 const qdev = require('../qtools/qdev');
 const config_developer = require('../system_developer/config_developer');
-const config = require('../system/config');   
+const config = require('../system/config');
 
 // === manually-defined configs ===================
 
@@ -22,7 +22,7 @@ exports.developingAllowedBrowserSignature = function () {
 }
 
 exports.port = function () {
-	return '49915';
+	return '49911';
 }
 
 // enables alternative codes to be given for items
