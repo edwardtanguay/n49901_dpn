@@ -422,13 +422,13 @@ class Item {
 		return r;
 	}
 
-	getDefaultHtmlBodyAsTable() {
+	getDefaultHtmlBodyAsTable(options = {}) {
 		let r = '';
 		r += `<div class="d-block d-sm-none defaultHtmlBodyAsSmartphoneFieldList">`;
 		for (const dataType of this.items.dataTypes) {
 			if (dataType.kind == 'custom') {
 				r += `<div class="label">${dataType.label}:</div>`;
-				r += `<div class="data">${dataType.getNiceValue(this)}</div>`;
+				r += `<div class="data">${dataType.getNiceValue(this, options)}</div>`;
 			}
 		}
 		r += `</div>`;
@@ -437,7 +437,7 @@ class Item {
 			if (dataType.kind == 'custom') {
 				r += `<tr>`;
 				r += `<td class="label">${dataType.label}:</td>`;
-				r += `<td class="data">${dataType.getNiceValue(this)}</td>`;
+				r += `<td class="data">${dataType.getNiceValue(this, options)}</td>`;
 				r += `</tr>`;
 			}
 		}

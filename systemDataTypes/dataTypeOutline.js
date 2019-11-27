@@ -12,8 +12,8 @@ class DataTypeOutline extends DataTypeParagraph {
 		return this.validationResponse();
 	}
 
-	getNiceValue(item) {
-		return '<div class="dataTypeOutline">' + qstr.parseOutline(this.getValue(item), item.itemTypeIdCode) + '</div>';
+	getNiceValue(item, options = {}) {
+		return '<div class="dataTypeOutline">' + qstr.parseOutline(this.getValue(item), item.itemTypeIdCode, options) + '</div>';
 	}
 
 	getTitleInfo() {

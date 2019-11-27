@@ -802,8 +802,8 @@ exports.unmaskText = function (contents, textToMask) {
 	return r;
 }
 
-exports.parseOutline = function (outlineText, itemTypeIdCode = '') {
-	const outlineTextParser = new OutlineTextParser(outlineText);
+exports.parseOutline = function (outlineText, itemTypeIdCode = '', options = {}) {
+	const outlineTextParser = new OutlineTextParser(outlineText, options);
 	const imageDirectory = itemTypeIdCode == '' ? 'general' : itemTypeIdCode;
 	outlineTextParser.relativePublicImageDirectory = 'customImages/' + imageDirectory;
 	outlineTextParser.parse();

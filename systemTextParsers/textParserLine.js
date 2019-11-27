@@ -7,7 +7,8 @@ const system = require('../system/system');
 
 // TODO: CHANGE TO outlineTextParserLine
 class TextParserLine {
-	constructor(line, lineNumber, lastNumberOfIndents, totalNumberOfLines) {
+	constructor(line, lineNumber, lastNumberOfIndents, totalNumberOfLines, options) {
+		this.options = options;
 		this.line = line;
 		this.lineNumber = lineNumber;
 		this.lastNumberOfIndents = lastNumberOfIndents;
@@ -163,7 +164,9 @@ class TextParserLine {
 			r = qstr.parseMarkDown(r, {
 				suppressParagraphMarks: true, suppressOrderedListElements: true
 			});
-			r = qstr.convertUrlsToLinkableUrls(r);
+			if (this.options.httpHighlightInCode) {
+				r = qstr.convertUrlsToLinkableUrls(r);
+			}
 		} else {
 			r = qstr.parseMarkDown(r, {
 				suppressParagraphMarks: true, suppressOrderedListElements: true
