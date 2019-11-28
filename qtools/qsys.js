@@ -93,8 +93,6 @@ exports.setCurrentUserIdCode = function (request, userIdCode) {
 
 exports.getCurrentUserIdCode = function (request = null) {
 	if (request != null) {
-		qdev.debug('got from here');
-		console.log(request.session);
 		return qsys.getSessionVariable(request, 'currentUserIdCode', config.defaultUserIdCode());
 	} else {
 		return config.getUserIdCodeWhenItIsNotUnknownWhoOwnsRecord();
