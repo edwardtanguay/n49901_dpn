@@ -4,6 +4,15 @@ const qdev = require('../qtools/qdev');
 const config_developer = require('../system_developer/config_developer');
 const config = require('../system/config');
 
+// === nnnnnnnnnnnnn ==============================
+
+// CHANGE PORT HERE
+// a Datapod convention is to name your site directory e.g. n49999_mysite and set the port to 49999
+// this naming convention helps to more easily keep multiple sites organized
+exports.port = function () {
+	return '49901';
+}
+
 // === manually-defined configs ===================
 
 //** NOW WORKING ON ISSUE003
@@ -19,10 +28,6 @@ exports.siteMode = function () {
 exports.developingAllowedBrowserSignature = function () {
 	const signature = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36';
 	return signature;
-}
-
-exports.port = function () {
-	return '49901';
 }
 
 // enables alternative codes to be given for items
