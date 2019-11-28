@@ -1,7 +1,7 @@
 "use strict"
 const qstr = require('../qtools/qstr');
 const qdev = require('../qtools/qdev');
-const config_developer = require('../system_developer/config_developer');
+const developer_config = require('./developer_config');
 const config = require('../system/config');
 
 // === nnnnnnnnnnnnn ==============================
@@ -195,10 +195,10 @@ exports.getUserIdCodeWhenItIsNotUnknownWhoOwnsRecord = function () {
 // remapped configs
 
 exports.developing = function () {
-	return config_developer.developing();
+	return developer_config.developing();
 }
 exports.defaultUserIdCode = function () {
-	return config_developer.defaultUserIdCode();
+	return developer_config.defaultUserIdCode();
 }
 
 //this is used in showcaseMultistepAjaxProcess to change a file so that node has to restart

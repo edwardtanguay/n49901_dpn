@@ -93,6 +93,8 @@ exports.setCurrentUserIdCode = function (request, userIdCode) {
 
 exports.getCurrentUserIdCode = function (request = null) {
 	if (request != null) {
+		qdev.debug('got from here');
+		console.log(request.session);
 		return qsys.getSessionVariable(request, 'currentUserIdCode', config.defaultUserIdCode());
 	} else {
 		return config.getUserIdCodeWhenItIsNotUnknownWhoOwnsRecord();
@@ -199,7 +201,7 @@ exports.deleteItemType = function (itemTypeIdCode) {
 }
 
 exports.logLocalDevUserOut = function () {
-	const dynamicPage = new DynamicFile('system_developer/config_developer.js');
+	const dynamicPage = new DynamicFile('system/developer_config.js');
 	dynamicPage.changeMarkerLineAndSave('defaultUserIdCode', "return 'anonymousUser';");
 	dynamicPage.changeMarkerLineAndSave('configDeveloping', "return false;");
 	qsys.sleep(3000); // wait for nodemon to restart
