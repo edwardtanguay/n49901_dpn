@@ -3,7 +3,9 @@ const qstr = require('../qtools/qstr');
 const qdev = require('../qtools/qdev');
 const config = require('./config');
 
-// outputs debugging information to console, keeps developer logged in even after backend modifications to code
+// FOR DEVELOPING, SET TO TRUE
+// outputs debugging information to console
+// keeps dev logged in even after backend modifications to code
 exports.developing = function () {
 	return false;//DYNAMIC_LINE:configDeveloping
 }
