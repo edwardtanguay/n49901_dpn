@@ -1,0 +1,361 @@
+<%
+//DYNAMIC_VARIABLE:extensions=bootstrap,jquery,vuejs,axios,fontawesome,lodash
+%>
+<%- include(data.system_layout_header)  %>
+
+<div id="app">
+    <div class="card smartFormCard">
+        <div class="card-header">
+            <div class="pull-left" :class="{areaLoading: pageStatus=='busy'}">{{commandTitle}} Test Server</div>
+            <div class="pull-right">
+                <div class="pull-left headerInfo"></div><i v-show="pageStatus!='ready'"
+                    class="pull-left fa fa-cog fa-spin waitSpinner"></i>
+            </div>
+        </div>
+        <div class="card-body smartFormBody" :class="{areaLoading: pageStatus=='busy'}">
+            <div class="messageArea" style="display:none">
+                <div v-show="formStatus=='success'" class="alert alert-success" v-html="formMessage"></div>
+                <div v-show="formStatus=='invalid'" class="alert alert-danger">
+                    <strong>Form is invalid:</strong> {{formMessage}}
+                </div>
+                <div v-show="formStatus=='error'" class="alert alert-danger">
+                    <strong>Error:</strong> <span v-html="formMessage"></span>
+                </div>
+            </div>
+            <div v-show="pageStatus!='busy'" class="bodyContent" style="display:none">
+
+                <!-- field: TITLE -->
+                <dl class="dataType_line">
+                    <dt><span v-if="fields.title.required">*</span>{{fields.title.label}}</dt>
+                    <dd>
+                        <div>
+                            <input id="field_title" v-model="fields.title.value" class="form-control dataType_line"
+                                @keydown="keyWasPressed" @keyup="keyWasPressed" v-on:keyup.enter="onEnterClick()"
+                                :disabled="pageStatus=='busy'" />
+                        </div>
+                        <!-- field info, examples, and error messags -->
+                        <div>
+                            <small v-if="fields.title.errorMessage != ''" class="error">{{fields.title.errorMessage}}
+                            </small>
+                            <small v-if="fields.title.info" class="info">{{fields.title.info}} </small>
+                            <small v-if="fields.title.example" class="example"><span class="exampleLabel">Example:</span> <span class="exampleText">{{fields.title.example}}</span>
+                            </small>
+                        </div>
+                    </dd>
+                </dl>
+
+                <!-- field: NOTES -->
+                <dl class="dataType_outline">
+                    <dt><span v-if="fields.notes.required">*</span>{{fields.notes.label}}<span class="titleInfo"> (outline)</span><span class="pull-right"><i class="fa fa-question-circle helpIcon"
+                @click="toggleShowHelp(fields.notes, 'notes', 'parseOutline')" title="Outline Help"></i></span></dt>
+                    <dd>
+                        <div>
+                            <textarea id="field_notes" :disabled="pageStatus=='busy'" v-model="fields.notes.value"
+                                    @keydown="keyWasPressed" @keyup="keyWasPressed" class="form-control dataType_outline_control"></textarea>
+                        </div>
+                        <!-- field info, examples, and error messags -->                        <div class="helpArea" v-show="fields.notes.showHelp">
+        <p>Syntax rules for creating outlines:</p>
+    <ul>
+        <li>type each line of outline with a preceding "- " and indent as needed</li>
+        <li>You can write in *italics* or **bold** or type come code, e.g. `CTRL-C`.</li>
+		<li>You can [search](http://google.com) here.</li>             
+        <li>You can embed graphics (png) in your outline by refering to them at the end of a line like this. The .png graphic with that name (e.g. helpGraphic.png) has to be in the directory specified in config.sourceImageAbsolutePath().##helpGraphic</li>        
+        <li>You can embed videos in your outline by refering to them with their YouTube code at the end of a line like this: a four-minute video of Guido van Rossum talking about how he created Python@@J0Aq44Pze-w</li>   		
+    </ul>
+        <div>
+        <button class="btn-default btn btn-sm pull-left" :disabled="fields.notes.waitForParsing"
+            @click="parseHelpFieldText(fields.notes,'notes', 'parseOutline')"
+            v-show="fields.notes.value">Update</button> <i v-show="fields.notes.waitForParsing"
+            class="pull-left fa fa-cog fa-spin checkSyntaxWaitIcon"></i>
+        <div class="clear"></div>
+        <div class="mainParsedTextArea"
+            :class="{parsedTextArea: !fields.notes.waitForParsing, parsedTextAreaWaiting: fields.notes.waitForParsing}"
+            v-show="fields.notes.showParsedText && fields.notes.value"
+            v-html="fields.notes.parsedText"></div>
+    </div>
+    </div>
+                        <div>
+                            <small v-if="fields.notes.errorMessage != ''" class="error">{{fields.notes.errorMessage}}
+                            </small>
+                            <small v-if="fields.notes.info" class="info">{{fields.notes.info}} </small>
+                            <small v-if="fields.notes.example" class="example"><span class="exampleLabel">Example:</span> <span class="exampleText">{{fields.notes.example}}</span>
+                            </small>
+                        </div>
+                    </dd>
+                </dl>
+
+
+
+                <!-- form notes -->
+                <div class="pull-left formNotes">
+                    <span v-show="thereAreRequiredFields()" class="requiredFieldMarker">* required field</span>
+				</div>
+				<div class="clear"></div>
+
+                <!-- submit button -->
+                <div class="pull-left">
+                    <button @click="cancelForm()" class="btn btn-default cancelButton">Cancel</button>
+                </div>
+                <div class="pull-right">
+                    <button id="buttonSubmit" :disabled="formSubmitButtonShouldBeDisabled()" @click="processForm()"
+                        class="btn btn-default formButton">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            clientSideEmptyFieldChecking: false,
+            pageStatus: 'ready',
+            formStatus: '',
+            formMessage: '',
+            fields: {
+                  title: {
+                    label: '',
+                    dataTypeIdCode: '',
+                    value: '',
+                    info: '',
+                    example: '',
+                    required: false,
+                    errorStatus: '',
+                    errorMessage: '',
+                    displayStatus: '',
+                    choices: '',
+                    choiceSelector: ''
+                },
+                notes: {
+                    label: '',
+                    dataTypeIdCode: '',
+                    value: '',
+                    info: '',
+                    example: '',
+                    required: false,
+                    errorStatus: '',
+                    errorMessage: '',
+                    displayStatus: '',
+                    choices: '',
+                    choiceSelector: ''
+                }
+            },
+            returnUrl: '',
+            command: '',
+            id: 0,
+            commandTitle: ''
+        },
+        methods: {
+            initialize: function () {
+                $('.bodyContent').show();
+                $('.messageArea').show();
+                this.returnUrl = qsys.getParameterValueFromUrl('returnUrl');
+                this.command = qsys.getParameterValueFromUrl('command');
+                this.id = qsys.getParameterValueFromUrl('id');
+                this.commandTitle = qstr.capitalizeFirstLetter(this.command);
+
+                this.loadPageData();
+            },
+            loadPageData: function () {
+                this.pageStatus = 'busy';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'controllerManageTestServer',
+                    data: {
+                        action: 'loadPageData',
+                        command: this.command,
+                        id: this.id
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+                    const item = response.data.item;
+                    that.fields = response.data.fields;
+                    
+                    //extended fields
+                    for (const key in that.fields) {
+                        const field = that.fields[key];
+                        field.showHelp = false;
+                        field.parsedText = '';
+                        field.showParsedText = false;
+                        field.waitForParsing = false;
+                    }
+
+                    that.focusField(formFocusedFieldIdCode);
+                    that.pageStatus = 'ready';
+                }).catch(function (error) {
+                    that.pageStatus = 'failed';
+                });
+            },
+            processForm: function () {
+                this.pageStatus = 'busy';
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'controllerManageTestServer',
+                    data: {
+                        action: 'processForm',
+                        fields: that.fields,
+                        command: this.command,
+                        id: this.id
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    const formFocusedFieldIdCode = response.formFocusedFieldIdCode;
+                    that.formStatus = response.formStatus;
+                    that.formMessage = response.formMessage;
+                    that.fields = response.data.fields;
+                    that.focusField(formFocusedFieldIdCode);
+                    if (that.formStatus != 'invalid') {
+                        that.returnToSendingPage();
+                    } else {
+                        that.pageStatus = 'ready';
+                    }
+                }).catch(function (error) {
+                    that.formMessageKind = 'error';
+                    that.formMessage = 'An unknown error occurred.';
+                });
+            },
+            onEnterClick: function () {
+                $('#buttonSubmit').click();
+            },
+            qstr_isEmpty: function (line) {
+                return qstr.isEmpty(line);
+            },
+            formSubmitButtonShouldBeDisabled: function () {
+                if (!this.clientSideEmptyFieldChecking) {
+                    return false;
+                }
+                if (this.pageStatus == 'busy') {
+                    return true;
+                }
+                for (const key in this.fields) {
+                    const field = this.fields[key];
+                    if (field.required && qstr.isEmpty(field.value)) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            keyWasPressed: function (e) {
+
+                if (e.keyCode === 13 && e.ctrlKey) {
+                    this.onEnterClick();
+                }
+
+                this.formSubmitButtonShouldBeDisabled();
+
+                let thereAreErrors = false;
+
+                //empty fields
+                for (const idCode in this.fields) {
+                    const field = this.fields[idCode];
+                    if (field.required && qstr.isEmpty(field.value)) {
+                        this.setDataInFields(idCode, 'errorMessage',
+                            'This value is required and cannot be empty.');
+                        thereAreErrors = true;
+                    } else {
+                        this.setDataInFields(idCode, 'errorMessage', '');
+                    }
+                }
+            },
+            focusField: function (fieldIdCode) {
+                setTimeout(function () {
+                    $('#field_' + fieldIdCode).focus();
+                }, 50);
+            },
+            setDataInFields: function (idCode, property, value) {
+                const field = `${idCode}.${property}`;
+                _.set(this.fields, field, value)
+
+            },
+            thereAreRequiredFields: function () {
+                for (const idCode in this.fields) {
+                    const field = this.fields[idCode];
+                    if (field.required) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            switchChoiceSelector: function (field) {
+                switch (field.choiceSelector) {
+                    case 'radioVertical':
+                        field.choiceSelector = 'dropdown';
+                        break;
+                    case 'dropdown':
+                        field.choiceSelector = 'radioHorizontal';
+                        break;
+                    case 'radioHorizontal':
+                    default:
+                        field.choiceSelector = 'radioVertical';
+                        break;
+                }
+            },
+            cancelForm: function () {
+                this.returnToSendingPage();
+            },
+            returnToSendingPage() {
+                qsys.gotoPage(this.returnUrl);
+            },
+            toggleShowHelp(field, fieldIdCode, parseMethod) {
+                field.showHelp = !field.showHelp;
+                if (field.showHelp) {
+                    this.focusField(fieldIdCode);
+                }
+                this.parseHelpFieldText(field, fieldIdCode, parseMethod);
+                this.$forceUpdate();
+            }, 
+            parseHelpFieldText(field, fieldIdCode, parseMethod = 'parseMarkdown') {
+                field.waitForParsing = true;
+                this.$forceUpdate();
+                const that = this;
+                axios({
+                    method: 'post',
+                    url: 'controllerManageTestServer',
+                    data: {
+                        action: parseMethod,
+                        originalText: field.value
+                    }
+                }).then(function (responseObject) {
+                    const response = qsys.getResponse(responseObject);
+                    field.parsedText = response.data.parsedText;
+                    field.showParsedText = true;
+                    field.waitForParsing = false;
+                    that.$forceUpdate();
+                }).catch(function (error) {
+                    that.formMessageKind = 'error';
+                    that.formMessage = 'An unknown error occurred.';
+                });
+            }
+        }
+    });
+    app.initialize();
+
+        
+        $(function () {
+            $(document).delegate('#field_notes', 'keydown', function (e) {
+                var keyCode = e.keyCode || e.which;
+
+                if (keyCode == 9) {
+                    e.preventDefault();
+                    var start = this.selectionStart;
+                    var end = this.selectionEnd;
+
+                    // set textarea value to: text before caret + tab + text after caret
+                    $(this).val($(this).val().substring(0, start)
+                        + "\t"
+                        + $(this).val().substring(end));
+
+                    // put caret at right position again
+                    this.selectionStart = this.selectionEnd = start + 1;
+                }
+            });
+        });
+        
+    
+</script>
+
+<%- include(data.system_layout_footer)  %>

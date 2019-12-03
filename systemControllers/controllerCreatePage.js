@@ -23,7 +23,6 @@ class ControllerCreatePage extends Controller {
 	}
 
 	action_loadPageData() {
-		//sync
 		this.formTypeDefinitionFieldBlock = `
 *Type; choice; $choiceSelector = radioVertical; $choices = <h>Display Simple Data from Backend</h> <in>(a very simple display-data-not-from-database page)</in> [simpleData]*, <h>Display ItemType Page</h> <in>(enables user to easily search and edit items)</in> [itemTypeDisplay], <h>Display Data from SQL statement</h> <in>(a very simple display-data-from-database page)</in> [sqlStatement], <h>Custom Form</h> <in>(type in list of fields to make a form)</in> [customForm], <h>Multi-ItemType Search Page</h> <in>(enables user to search for numerous kinds of items)</in> [multiitemSearchPage], <h>Manage Item</h> <in>(use if you add a field to an ItemType)</in> [manageItem], <h>Manage Items</h> <in>(use if you add a field to an ItemType)</in> [manageItems], <h>Text Parser</h> <in>(parses text on button-click)</in> [textParser], <h>Transformation Synchronizer</h> <in>(text automatically parsed as one types)</in> [transformationSynchronizer], <h>Screen Scraping Page</h> <in>(controller reads data from an external website)</in> [screenScraping], <h>Multiple Ajax Steps</h> <in>(a form which sends commands to controller one at a time)</in> [multipleAjaxSteps], <h>Display XML File</h> <in>(controller parses XML file and sends data to frontend)</in> [displayXmlFile]
 		*Title; line; $info = Enter name of page to create.; $example = Create Quarter Report

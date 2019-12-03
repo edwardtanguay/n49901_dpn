@@ -2,8 +2,10 @@
 const qstr = require('../qtools/qstr');
 const qfil = require('../qtools/qfil');
 const qdev = require('../qtools/qdev');
+const qdat = require('../qtools/qdat');
 const config = require('../system/config');
 const system = require('../system/system');
+const _ = require('lodash');
 
 // TODO: CHANGE TO outlineTextParserLine
 class TextParserLine {
@@ -54,8 +56,10 @@ class TextParserLine {
 	}
 
 
-	parse() {
 
+
+	parse(options = {}) {
+		const highlightedDateLines = _.has(options, 'highlightedDateLines') ? options.highlightedDateLines : false;
 		//process image file
 		if (this.imageIdCode != '') {
 			this.imageFileName = this.imageIdCode + '.png';
@@ -67,7 +71,6 @@ class TextParserLine {
 			}
 			this.imagePathAndFileName = this.relativePublicImageDirectory + '/' + this.imageFileName;
 		}
-
 
 		const numberOfIndents = qstr.getNumberOfPrecedingTabs(this.line, true);
 		if (this.lineNumber == 1) {
@@ -82,6 +85,16 @@ class TextParserLine {
 
 		this.preHtml += '<li>';
 		this.html += this.parseForOutline();
+
+		//options
+		if (highlightedDateLines) {
+			if (qdat.isStandardDate(this.content)) {
+				//this.html = `<b>${this.html}</b>`;
+				//this.html = `<b>${qdat.getShortMonthWithWeekDay(this.content)}</b>`;
+				this.html = `<span class="theDateLine">${qdat.getShortMonthWithWeekDayGerman(this.content, { fullWeekDay: true })}</class>`;
+			}
+		}
+
 		this.postHtml += '</li>';
 
 		if (this.lineNumber == this.totalNumberOfLines) {

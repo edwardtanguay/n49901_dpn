@@ -1,5 +1,6 @@
 const qstr = require('../qtools/qstr');
 const qdev = require('../qtools/qdev');
+const qmat = require('../qtools/qmat');
 const Choice = require('../systemClasses/choice.js');
 const Markdown = require("markdown").markdown;
 const OutlineTextParser = require('../systemTextParsers/outlineTextParser');
@@ -582,7 +583,9 @@ exports.getSmartPart = function (parts, index, defaultValue = '') {
 // TODO: WRITE TESTS FOR THE FOLLOWING
 
 exports.contains = function (line, searchText) {
-	return String(line).includes(searchText);
+	const compareLine = String(line).toUpperCase();
+	const searchTextCompare = String(searchText).toUpperCase();
+	return compareLine.includes(searchTextCompare);
 }
 
 
@@ -802,13 +805,13 @@ exports.unmaskText = function (contents, textToMask) {
 	return r;
 }
 
-exports.parseOutline = function (outlineText, itemTypeIdCode = '', options = {}) {
-	const outlineTextParser = new OutlineTextParser(outlineText, options);
+//highlightedDateLines: true = dates like 2019-11-10 alone on line will be highlighted
+exports.parseOutline = function (outlineText, itemTypeIdCode = '', options = null) {
+	const outlineTextParser = new OutlineTextParser(outlineText);
 	const imageDirectory = itemTypeIdCode == '' ? 'general' : itemTypeIdCode;
 	outlineTextParser.relativePublicImageDirectory = 'customImages/' + imageDirectory;
-	outlineTextParser.parse();
+	outlineTextParser.parse(options);
 	return outlineTextParser.displayParsed();
-
 }
 
 exports.isInList = function (term, termsList) {
@@ -949,4 +952,19 @@ exports.chopEnds = function (text, chopLeftText, chopRightText) {
 	r = qstr.chopLeft(r, chopLeftText);
 	r = qstr.chopRight(r, chopRightText);
 	return r;
+}
+
+exports.regexCheck = function (line, regexText) {
+	const regex = new RegExp(regexText);
+	return regex.test(line);
+}
+
+
+exports.getSubstringAsNumber = function (line, start, end) {
+	const stringNumber = line.substring(start, end);
+	if (qmat.isInteger(stringNumber)) {
+		return qmat.forceInteger(stringNumber);
+	} else {
+		return null;
+	}
 }
