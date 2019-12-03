@@ -56,9 +56,6 @@ const ControllerShowcaseRegexParser = require('../systemControllers/controllerSh
 const ControllerShowcaseScreenScraping = require('../systemControllers/controllerShowcaseScreenScraping'); //:showcaseScreenScraping
 const ControllerShowcaseLoadDataWithMultiplePromises = require('../systemControllers/controllerShowcaseLoadDataWithMultiplePromises'); //:showcaseLoadDataWithMultiplePromises
 const ControllerShowcaseLoadFromMultipleDataSources = require('../systemControllers/controllerShowcaseLoadFromMultipleDataSources'); //:showcaseLoadFromMultipleDataSources
-const ControllerManageTestServers = require('../systemControllers/controllerManageTestServers'); //:manageTestServers
-const ControllerManageTestServer = require('../systemControllers/controllerManageTestServer'); //:manageTestServer
-const ControllerTestServers = require('../systemControllers/controllerTestServers'); //:testServers
 
 exports.instantiate = function (controllerIdCode, request, response) {
 	switch (controllerIdCode) {
@@ -121,12 +118,6 @@ case 'controllerShowcaseEditXmlFile': //:showcaseEditXmlFile
 return new ControllerShowcaseEditXmlFile(request, response);
 case 'controllerManageItemTypes': //:manageItemTypes
 return new ControllerManageItemTypes(request, response);
-case 'controllerManageTestServers': //:manageTestServers
-return new ControllerManageTestServers(request, response);
-case 'controllerManageTestServer': //:manageTestServer
-return new ControllerManageTestServer(request, response);
-case 'controllerTestServers': //:testServers
-return new ControllerTestServers(request, response);
 case 'controllerManageItemTypes':
 return new ControllerManageItemTypes(request, response);
 case 'controllerManageItemType': //:manageItemType
