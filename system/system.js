@@ -48,6 +48,7 @@ const PageItem = require('../systemItems/pageItem'); //:pageItems
 const ShowcaseBook = require('../systemItems/showcaseBook'); //:showcaseBooks
 const ShowcaseUser = require('../systemItems/showcaseUser'); //:showcaseUsers
 const User = require('../systemItems/user'); //:users
+const TestServer = require('../systemItems/testServer'); //:testServers
 
 //DYNAMIC_CODE_AREA:includeItemsArea
 const ItemTypes = require('../systemItems/itemTypes'); //:itemTypes
@@ -55,6 +56,7 @@ const PageItems = require('../systemItems/pageItems'); //:pageItems
 const ShowcaseBooks = require('../systemItems/showcaseBooks'); //:showcaseBooks
 const ShowcaseUsers = require('../systemItems/showcaseUsers'); //:showcaseUsers
 const Users = require('../systemItems/users'); //:users
+const TestServers = require('../systemItems/testServers'); //:testServers
 
 // dataTypeDefinitionLine = e.g.
 // id >>> WholeNumber
@@ -142,61 +144,61 @@ exports.instantiateDataType = function (dataTypeDefinitionLine) {
 
 	let dataType = null;
 	switch (dataTypeIdCode) {
-//DYNAMIC_CODE_AREA:dataTypeSwitchBlock,3
-case 'id': //:id
-dataType = new DataTypeId(label, extras);
-break;
-case 'idCode': //:idCode
-dataType = new DataTypeIdCode(label, extras);
-break;
-case 'paragraph': //:paragraph
-dataType = new DataTypeParagraph(label, extras);
-break;
-case 'choice': //:choice
-dataType = new DataTypeChoice(label, extras);
-break;
-case 'wholeNumber': //:wholeNumber
-dataType = new DataTypeWholeNumber(label, extras);
-break;
-case 'numberOfBookPages': //:numberOfBookPages
-dataType = new DataTypeNumberOfBookPages(label, extras);
-break;
-case 'dateTime': //:dateTime
-dataType = new DataTypeDateTime(label, extras);
-break;
-case 'systemWhenCreated': //:systemWhenCreated
-dataType = new DataTypeSystemWhenCreated(label, extras);
-break;
-case 'systemWhoCreated': //:systemWhoCreated
-dataType = new DataTypeSystemWhoCreated(label, extras);
-break;
-case 'list': //:list
-dataType = new DataTypeList(label, extras);
-break;
-case 'password': //:password
-dataType = new DataTypePassword(label, extras);
-break;
-case 'text': //:text
-dataType = new DataTypeText(label, extras);
-break;
-case 'markdown': //:markdown
-dataType = new DataTypeMarkdown(label, extras);
-break;
-case 'outline': //:outline
-dataType = new DataTypeOutline(label, extras);
-break;
-case 'department': //:department
-dataType = new DataTypeDepartment(label, extras);
-break;
-case 'test333': //:test333
-dataType = new DataTypeTest333(label, extras);
-break;
-case 'test444': //:test444
-dataType = new DataTypeTest444(label, extras);
-break;
-case 'longLine': //:longLine
-dataType = new DataTypeLongLine(label, extras);
-break;
+		//DYNAMIC_CODE_AREA:dataTypeSwitchBlock,3
+		case 'id': //:id
+			dataType = new DataTypeId(label, extras);
+			break;
+		case 'idCode': //:idCode
+			dataType = new DataTypeIdCode(label, extras);
+			break;
+		case 'paragraph': //:paragraph
+			dataType = new DataTypeParagraph(label, extras);
+			break;
+		case 'choice': //:choice
+			dataType = new DataTypeChoice(label, extras);
+			break;
+		case 'wholeNumber': //:wholeNumber
+			dataType = new DataTypeWholeNumber(label, extras);
+			break;
+		case 'numberOfBookPages': //:numberOfBookPages
+			dataType = new DataTypeNumberOfBookPages(label, extras);
+			break;
+		case 'dateTime': //:dateTime
+			dataType = new DataTypeDateTime(label, extras);
+			break;
+		case 'systemWhenCreated': //:systemWhenCreated
+			dataType = new DataTypeSystemWhenCreated(label, extras);
+			break;
+		case 'systemWhoCreated': //:systemWhoCreated
+			dataType = new DataTypeSystemWhoCreated(label, extras);
+			break;
+		case 'list': //:list
+			dataType = new DataTypeList(label, extras);
+			break;
+		case 'password': //:password
+			dataType = new DataTypePassword(label, extras);
+			break;
+		case 'text': //:text
+			dataType = new DataTypeText(label, extras);
+			break;
+		case 'markdown': //:markdown
+			dataType = new DataTypeMarkdown(label, extras);
+			break;
+		case 'outline': //:outline
+			dataType = new DataTypeOutline(label, extras);
+			break;
+		case 'department': //:department
+			dataType = new DataTypeDepartment(label, extras);
+			break;
+		case 'test333': //:test333
+			dataType = new DataTypeTest333(label, extras);
+			break;
+		case 'test444': //:test444
+			dataType = new DataTypeTest444(label, extras);
+			break;
+		case 'longLine': //:longLine
+			dataType = new DataTypeLongLine(label, extras);
+			break;
 		default:
 			dataType = new DataTypeLine(label, extras);
 			break;
@@ -294,11 +296,12 @@ exports.instantiatePageBuilder = function (title, type, kind, data) {
 
 exports.instantiateItem = function (itemTypeIdCode) {
 	const factory = {
-//DYNAMIC_CODE_AREA:instantiateItemArea
-"itemTypes": ItemType, //:itemTypesg
-"pageItems": PageItem, //:pageItems
-"showcaseBooks": ShowcaseBook, //:showcaseBooks
-"showcaseUsers": ShowcaseUser, //:showcaseUsers
+		//DYNAMIC_CODE_AREA:instantiateItemArea
+		"itemTypes": ItemType, //:itemTypesg
+		"pageItems": PageItem, //:pageItems
+		"showcaseBooks": ShowcaseBook, //:showcaseBooks
+		"showcaseUsers": ShowcaseUser, //:showcaseUsers
+		"testServers": TestServer, //:testServers
 
 		"users": User
 	};
@@ -311,11 +314,12 @@ exports.instantiateItem = function (itemTypeIdCode) {
 
 exports.instantiateItems = function (itemTypeIdCode) {
 	const factory = {
-//DYNAMIC_CODE_AREA:instantiateItemsArea
-"itemTypes": ItemTypes, //:itemTypes
-"pageItems": PageItems, //:pageItems
-"showcaseBooks": ShowcaseBooks, //:showcaseBooks
-"showcaseUsers": ShowcaseUsers, //:showcaseUsers
+		//DYNAMIC_CODE_AREA:instantiateItemsArea
+		"itemTypes": ItemTypes, //:itemTypes
+		"pageItems": PageItems, //:pageItems
+		"showcaseBooks": ShowcaseBooks, //:showcaseBooks
+		"showcaseUsers": ShowcaseUsers, //:showcaseUsers
+		"testServers": TestServers, //:testServers
 
 		"users": Users
 	};
@@ -327,7 +331,6 @@ exports.instantiateItems = function (itemTypeIdCode) {
 }
 
 exports.instantiateItemsWithRecords = function (itemTypeIdCode, records) {
-	console.log(itemTypeIdCode);
 	const items = this.instantiateItems(itemTypeIdCode);
 	items.fillWithRecords(records);
 	return items;
@@ -341,4 +344,4 @@ exports.instantiateItemWithRecord = function (itemTypeIdCode, record) {
 	const item = this.instantiateItem(itemTypeIdCode);
 	item.fillWithRecord(record);
 	return item;
-}
+}

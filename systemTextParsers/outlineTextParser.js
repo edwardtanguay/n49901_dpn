@@ -4,6 +4,7 @@ const qdev = require('../qtools/qdev');
 const TextParser = require('./textParser');
 const TextParserLine = require('./textParserLine');
 const config = require('../system/config');
+const _ = require('lodash');
 
 class OutlineTextParser extends TextParser {
 	constructor(body, options = {}) {
@@ -23,7 +24,12 @@ class OutlineTextParser extends TextParser {
 		}
 	}
 
-	parse() {
+	parse(options = {}) {
+		const highlightedDateLines = _.has(options, 'highlightedDateLines') ? options.highlightedDateLines : false;
+		const highlightedDateLinesStart = _.has(options, 'highlightedDateLinesStart') ? options.highlightedDateLinesStart : '';
+		if (!qstr.isEmpty(highlightedDateLinesStart)) {
+			this.lines.unshift(highlightedDateLinesStart);
+		}
 		this.setPublicImageDirectory(this.relativePublicImageDirectory);
 		let lineNumber = 1;
 		let lastNumberOfIndents = 0;
@@ -36,7 +42,7 @@ class OutlineTextParser extends TextParser {
 			textParserLine.sourceImageAbsolutePath = this.sourceImageAbsolutePath;
 			textParserLine.targetImageAbsolutePath = this.targetImageAbsolutePath;
 			textParserLine.relativePublicImageDirectory = this.relativePublicImageDirectory;
-			textParserLine.parse();
+			textParserLine.parse(options);
 
 			if (currentlyRecordingCodeBlock) {
 				if (textParserLine.content.startsWith(codeBlockDelimiter)) {

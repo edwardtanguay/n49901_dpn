@@ -235,3 +235,117 @@ exports.getWeekDayNameFromWeekDayNumber = function (weekDayNumber) {
 			return 'Saturday';
 	}
 }
+
+exports.getAbbreviatedMonthByMonthNumberGerman = function (monthNumberPerhapsInt) {
+	return qdat.getMonthByMonthNumberGerman(monthNumberPerhapsInt).substring(0, 3);
+}
+
+exports.getShortMonthWithWeekDay = function (dateTime, options = { fullWeekDay: false }) {
+	const weekDayNumber = qdat.getDayOfWeekNumber(dateTime);
+
+	let weekDay = '';
+	const fullWeekDayName = qdat.getWeekDayNameFromWeekDayNumber(weekDayNumber);
+	if (options.fullWeekDay) {
+		weekDay = fullWeekDayName;
+	} else {
+		weekDay = fullWeekDayName.substr(0, 3);
+	}
+	return weekDay + ', ' + qdat.getShortMonthDay(dateTime);
+}
+
+exports.getShortMonthWithWeekDayGerman = function (dateTime, options = { fullWeekDay: false }) {
+	const weekDayNumber = qdat.getDayOfWeekNumber(dateTime);
+
+	let weekDay = '';
+	const fullWeekDayName = qdat.getWeekDayNameFromWeekDayNumberGerman(weekDayNumber);
+	if (options.fullWeekDay) {
+		weekDay = fullWeekDayName;
+	} else {
+		weekDay = fullWeekDayName.substr(0, 2) + '.';
+	}
+	return weekDay + ', den ' + qdat.getShortMonthDayGerman(dateTime);
+}
+
+exports.getWeekDayNameFromWeekDayNumberGerman = function (weekDayNumber) {
+	switch (weekDayNumber) {
+		case 0:
+			return 'Sonntag';
+		case 1:
+			return 'Montag';
+		case 2:
+			return 'Dienstag';
+		case 3:
+			return 'Mittwoch';
+		case 4:
+			return 'Donnerstag';
+		case 5:
+			return 'Freitag';
+		case 6:
+			return 'Samstag';
+	}
+}
+
+// if valid date in form 2019-11-22
+exports.isStandardDate = function (potentionalDate) {
+	if (potentionalDate.length == 10 && qstr.regexCheck(potentionalDate, "\\d{4}-[01]\\d-[0-3]\\d")) {
+		if (qdat.isDate(potentionalDate)) {
+			return true;
+		} else {
+			return false;
+		}
+	} else {
+		return false;
+	}
+}
+
+exports.isDate = function (potentialDate) {
+	const timestamp = Date.parse(potentialDate);
+	if (isNaN(timestamp) == false) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+exports.getShortMonthDayGerman = function (dateTime) {
+	if (dateTime == null) {
+		dateTime = '';
+	}
+	const year = dateTime.substring(0, 4);
+	const month = dateTime.substring(5, 7);
+	const niceDay = qstr.padZeros(dateTime.substring(8, 10), 2);
+	const niceMonth = qdat.getMonthByMonthNumberGerman(month);
+	return `${niceDay}. ${niceMonth}`;
+}
+
+
+exports.getMonthByMonthNumberGerman = function (monthNumberPerhapsInt) {
+	monthNumber = qmat.forceInteger(monthNumberPerhapsInt);
+	switch (monthNumber) {
+		case 1:
+			return 'Januar'
+		case 2:
+			return 'Februar'
+		case 3:
+			return 'März'
+		case 4:
+			return 'April'
+		case 5:
+			return 'Mai'
+		case 6:
+			return 'Juni'
+		case 7:
+			return 'Juli'
+		case 8:
+			return 'August'
+		case 9:
+			return 'September'
+		case 10:
+			return 'Oktober'
+		case 11:
+			return 'November'
+		case 12:
+			return 'Dezember'
+	}
+	return 'UNKNOWN MONTH NUMBER: ' + monthNumber;
+}
