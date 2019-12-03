@@ -628,7 +628,7 @@ div.outlineWrapper {
   padding: 0 10px 14px 0;
 }
 ul.outline {
-  list-style: disc;
+  list-style: inside;
   margin: 1px 0 0 0 !important;
 }
 ul.outline li code {
@@ -660,6 +660,7 @@ ul.outline span.theDateLine {
   margin: 10px 0 0 -30px;
   display: inline-block;
   font-size: 11px;
+  z-index: -1;
 }
 ul.outline div.codeBlock {
   color: #000;
