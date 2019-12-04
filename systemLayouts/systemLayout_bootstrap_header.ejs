@@ -28,10 +28,17 @@
 			color: rgb(70, 70, 184) !important;
 		}
 
+		.developerPanelWait {
+			border-top: 1px solid rgb(70, 70, 184);
+			border-bottom: 1px solid rgb(70, 70, 184);
+			background-color: #eee;
+		}
+
 		.developerPanelWaitSpinner {
 			font-size: 36px;
 			color: navy;
 			opacity: .4;
+			padding: 10px;
 		}
 
 		.devPanelMenuArea {
@@ -45,11 +52,11 @@
 			border-top: 1px solid #bbb;
 			border-left: 1px solid #bbb;
 			border-right: 1px solid #bbb;
-			padding: 10px;
+			padding: 13px;
 		}
 
 		.devPanelMenuLink:last-of-type {
-			border-bottom: 1px solid red;
+			/* border-bottom: 1px solid red; */
 		}
 
 		.devPanelMenuLinkSelected {
@@ -345,7 +352,8 @@
 			</nav>
 
 
-			<div style="display:none" class="developerPanel" v-show="developerPanelStatus=='show'">
+			<div style="display:none" class="developerPanel"
+				v-show="developerPanelStatus=='show' && developerPanelLoadingStatus != 'loading'">
 				<div v-show="developerPanelLoadingStatus == 'loaded'" class="developerPanelWrapper">
 
 					<!-- MENU: SMARTPHONE -->
@@ -372,23 +380,27 @@
 					<div class="devPanelContentAreaWrapper">
 						<div class="devPanelContentArea"
 							:class="[developerPanelActiveSection == 'panelDevHome' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
-							<!-- CONTENT -->
+							<!-- CONTENT: panelDevHome -->
 							<a href="batchImport">Batch Import</a></div>
-						<div class="devPanelContentArea"
-							:class="[developerPanelActiveSection == 'panelManageItems' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
-							<!-- CONTENT -->
-						</div>
-						<div class="devPanelContentArea"
-							:class="[developerPanelActiveSection == 'panelShowcases' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
-							<!-- CONTENT -->
-						</div>
+						<!-- END CONTENT -->
 					</div>
+					<div class="devPanelContentArea"
+						:class="[developerPanelActiveSection == 'panelManageItems' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
+						<!-- CONTENT: panelManageItems -->
+						<!-- END CONTENT -->
+					</div>
+					<div class="devPanelContentArea"
+						:class="[developerPanelActiveSection == 'panelShowcases' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
+						<!-- CONTENT: panelShowcases -->
+						<!-- END CONTENT -->
+					</div>
+				</div>
 
-				</div>
-				<div v-show="developerPanelLoadingStatus != 'loaded'" class="developerPanelWait">
-					<i class="fa fa-cog fa-spin developerPanelWaitSpinner"></i>
-				</div>
 			</div>
+			<div v-show="developerPanelLoadingStatus == 'loading'" class="developerPanelWait">
+				<i class="fa fa-cog fa-spin developerPanelWaitSpinner"></i>
+			</div>
+	</div>
 
 	</div>
 	<%if (data.system_message != '') { %>
@@ -447,7 +459,8 @@
 					toggleDeveloperPanel: function () {
 						this.developerPanelStatus = this.developerPanelStatus == 'hide' ? 'show' : 'hide';
 						if (this.developerPanelStatus == "show") {
-							$(".developerPanel").fadeIn(100);
+							//$(".developerPanel").fadeIn(100);
+							$(".developerPanelWait").fadeIn(100);
 							this.loadPanelData();
 						}
 					},
