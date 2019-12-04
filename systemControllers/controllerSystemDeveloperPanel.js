@@ -27,7 +27,7 @@ class ControllerSystemDeveloperPanel extends Controller {
 			this.responseData.developerMainPageItems = developerMainPageItems;
 			this.responseData.developerManagePageItems = developerManagePageItems;
 			this.responseData.developerShowcasePageItems = developerShowcasePageItems;
-			qsys.sleep(1000);
+
 			qsys.currentUserData(this.request, userData => {
 				this.responseData.userData = userData;
 				this.sendResponse();

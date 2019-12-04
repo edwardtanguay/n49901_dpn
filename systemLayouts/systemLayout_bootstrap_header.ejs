@@ -369,7 +369,7 @@
 			</nav>
 
 
-			<div style="display:none" class="developerPanel">
+			<div style="display:none" class="developerPanel" v-show="developerPanelStatus == 'show'">
 				<div class="developerPanelWrapper">
 
 					<!-- MENU: SMARTPHONE -->
@@ -403,10 +403,6 @@
 								<li v-for="item in developerMainPageItems"><a :href="item.idCode">{{item.title}}</a>
 								</li>
 							</ul>
-
-							<div v-if="developerPanelLoadingStatus == 'loading'" class="developerPanelWait">
-								<i class="fa fa-cog fa-spin developerPanelWaitSpinner"></i>
-							</div>
 
 							<!-- END CONTENT -->
 						</div>
@@ -492,15 +488,15 @@
 				methods: {
 					toggleDeveloperPanel: function () {
 						this.developerPanelStatus = this.developerPanelStatus == 'hide' ? 'show' : 'hide';
-						$(".developerPanel").fadeIn(100);
-						if (this.developerPanelStatus == "show") {
-							this.loadPanelData();
-						} else {
-							$(".developerPanel").fadeOut(100);
-						}
+						// $(".developerPanel").fadeIn(100);
+						// if (this.developerPanelStatus == "show") {
+						// 	this.loadPanelData();
+						// } else {
+						// 	$(".developerPanel").fadeOut(100);
+						// }
 					},
 					initialize: function () {
-
+						this.loadPanelData();
 					},
 					loadPanelData: function () {
 						this.developerPanelLoadingStatus = 'loading';
@@ -517,7 +513,8 @@
 							this.developerManagePageItems = response.data.developerManagePageItems;
 							this.developerShowcasePageItems = response.data.developerShowcasePageItems;
 							this.developerPanelLoadingStatus = 'loaded';
-							$(".developerPanel").fadeIn(100);
+							// $(".devPanelContentArea").hide();
+							// $(".devPanelContentArea").fadeIn(300);
 						}).catch(function (error) {
 							this.developerPanelLoadingStatus = 'failed';
 						});
