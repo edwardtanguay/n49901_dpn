@@ -103,6 +103,10 @@
 				margin-bottom: 10px;
 				color: #aaa;
 			}
+
+			.smartphoneSeparator {
+				color: #ccc !important;
+			}
 		}
 
 		/* tablet/computer view */
@@ -347,18 +351,11 @@
 					<!-- MENU: SMARTPHONE -->
 					<div class="d-inline d-sm-none">
 						<div class="devPanelMenuAreaSmartphone">
-							<span class="devPanelMenuLinkSmartphone"
-								:class="[developerPanelActiveSection == 'panelMostUsed' ? 'devPanelMenuLinkSmartphoneSelected' : 'devPanelMenuLinkSmartphoneUnselected']"
-								@click="changeSection('panelMostUsed')">
-								Main Tools</span> |
-							<span class="devPanelMenuLinkSmartphone"
-								:class="[developerPanelActiveSection == 'panelManageItems' ? 'devPanelMenuLinkSmartphoneSelected' : 'devPanelMenuLinkSmartphoneUnselected']"
-								@click="changeSection('panelManageItems')">
-								Manage Items</span> |
-							<span class="devPanelMenuLinkSmartphone"
-								:class="[developerPanelActiveSection == 'panelShowcases' ? 'devPanelMenuLinkSmartphoneSelected' : 'devPanelMenuLinkSmartphoneUnselected']"
-								@click="changeSection('panelShowcases')">
-								Showcases</span>
+							<span v-for="developerPanel in developerPanels"
+								class="devPanelMenuLinkSmartphone prohibitSelectionClickable"
+								:class="[developerPanelActiveSection == developerPanel.idCode ? 'devPanelMenuLinkSmartphoneSelected' : 'devPanelMenuLinkSmartphoneUnselected']"
+								@click="changeSection(developerPanel.idCode)">
+								{{developerPanel.title}}<span class="smartphoneSeparator"> | </span></span>
 						</div>
 					</div>
 
