@@ -17,28 +17,29 @@
 	<style>
 		.developerPanel {
 			background-color: #eee;
-			border-top: 1px solid rgb(70, 70, 184);
-			border-bottom: 1px solid rgb(70, 70, 184);
+			border-top: 1px solid #ccc;
+			border-bottom: 1px solid #ccc;
 			font-family: 'Courier New', Courier, monospace;
 			color: navy;
 		}
 
 		.developerPanelLink {
 			cursor: pointer;
-			color: rgb(70, 70, 184) !important;
+			/* color: rgb(70, 70, 184) !important; */
+			font-family: 'Courier New', Courier, monospace;
+			display: inline-block;
+			margin-top: 2px;
 		}
 
 		.developerPanelWait {
-			border-top: 1px solid rgb(70, 70, 184);
-			border-bottom: 1px solid rgb(70, 70, 184);
 			background-color: #eee;
+			padding: 3px 0 0 8px;
 		}
 
 		.developerPanelWaitSpinner {
-			font-size: 36px;
-			color: navy;
+			font-size: 26px;
+			color: #555;
 			opacity: .4;
-			padding: 10px;
 		}
 
 		.devPanelMenuArea {
@@ -89,6 +90,16 @@
 			font-weight: normal;
 		}
 
+		ul.contentPageList {
+			margin-left: -30px;
+		}
+
+		ul.contentPageList li {
+			list-style-type: none;
+		}
+
+
+
 		/* smartphone view */
 		@media (max-width: 577px) {
 			.developerPanelWrapper {
@@ -108,7 +119,7 @@
 				border-bottom: 1px solid #ddd;
 				padding-bottom: 10px;
 				margin-bottom: 10px;
-				color: #aaa;
+				color: #888;
 			}
 
 			.smartphoneSeparator {
@@ -130,6 +141,11 @@
 				flex-grow: 1;
 				position: relative;
 				padding: 10px;
+				border-left: 1px solid #ccc;
+			}
+
+			.computerMenuBackground {
+				background-color: #ddd;
 			}
 		}
 	</style>
@@ -144,6 +160,7 @@
 	<%if (true) {%>
 
 	<div id="appMenu">
+
 		<nav class="navbar navbar-expand-lg navbar-light bg-light developerMode">
 			<% } else { %>
 			<nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -208,9 +225,9 @@
 						<%}%>
 
                     <%
-                    // (((DROPDOWN)))
+                    // (((DROPDOWN))) --- not showing anymore, delete
                     %>
-						<% if(data.system_userIsDeveloper && data.system_totalNumberOfDeveloperPages > 0) {%>
+						<% if(false && data.system_userIsDeveloper && data.system_totalNumberOfDeveloperPages > 0) {%>
 						<li class="nav-item dropdown">
 							<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
 								data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">DEVELOPER</a>
@@ -352,9 +369,8 @@
 			</nav>
 
 
-			<div style="display:none" class="developerPanel"
-				v-show="developerPanelStatus=='show' && developerPanelLoadingStatus != 'loading'">
-				<div v-show="developerPanelLoadingStatus == 'loaded'" class="developerPanelWrapper">
+			<div style="display:none" class="developerPanel">
+				<div class="developerPanelWrapper">
 
 					<!-- MENU: SMARTPHONE -->
 					<div class="d-inline d-sm-none">
@@ -368,9 +384,10 @@
 					</div>
 
 					<!-- MENU: COMPUTER -->
-					<div class="d-none d-sm-inline">
+					<div class="d-none d-sm-inline computerMenuBackground">
 						<div class="devPanelMenuArea">
-							<div v-for="developerPanel in developerPanels" class="devPanelMenuLink"
+							<div v-for="developerPanel in developerPanels"
+								class="devPanelMenuLink prohibitSelectionClickable"
 								:class="[developerPanelActiveSection == developerPanel.idCode ? 'devPanelMenuLinkSelected' : 'devPanelMenuLinkUnselected']"
 								@click="changeSection(developerPanel.idCode)">
 								{{developerPanel.title}}</div>
@@ -378,29 +395,43 @@
 					</div>
 
 					<div class="devPanelContentAreaWrapper">
-						<div class="devPanelContentArea"
+						<div class="devPanelContentArea prohibitSelectionClickable"
 							:class="[developerPanelActiveSection == 'panelDevHome' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
-							<!-- CONTENT: panelDevHome -->
-							<a href="batchImport">Batch Import</a></div>
-						<!-- END CONTENT -->
-					</div>
-					<div class="devPanelContentArea"
-						:class="[developerPanelActiveSection == 'panelManageItems' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
-						<!-- CONTENT: panelManageItems -->
-						<!-- END CONTENT -->
-					</div>
-					<div class="devPanelContentArea"
-						:class="[developerPanelActiveSection == 'panelShowcases' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
-						<!-- CONTENT: panelShowcases -->
-						<!-- END CONTENT -->
-					</div>
-				</div>
 
+							<!-- CONTENT: panelDevHome -->
+							<ul class="contentPageList" v-if="developerPanelLoadingStatus != 'loading'">
+								<li v-for="item in developerMainPageItems"><a :href="item.idCode">{{item.title}}</a>
+								</li>
+							</ul>
+
+							<div v-if="developerPanelLoadingStatus == 'loading'" class="developerPanelWait">
+								<i class="fa fa-cog fa-spin developerPanelWaitSpinner"></i>
+							</div>
+
+							<!-- END CONTENT -->
+						</div>
+						<div class="devPanelContentArea"
+							:class="[developerPanelActiveSection == 'panelManageItems' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
+							<!-- CONTENT: panelManageItems -->
+							<ul class="contentPageList">
+								<li v-for="item in developerManagePageItems"><a :href="item.idCode">{{item.title}}</a>
+								</li>
+							</ul>
+							<!-- END CONTENT -->
+						</div>
+						<div class="devPanelContentArea"
+							:class="[developerPanelActiveSection == 'panelShowcases' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
+							<!-- CONTENT: panelShowcases -->
+							<ul class="contentPageList">
+								<li v-for="item in developerShowcasePageItems"><a :href="item.idCode">{{item.title}}</a>
+								</li>
+							</ul>
+							<!-- END CONTENT -->
+						</div>
+					</div>
+
+				</div>
 			</div>
-			<div v-show="developerPanelLoadingStatus == 'loading'" class="developerPanelWait">
-				<i class="fa fa-cog fa-spin developerPanelWaitSpinner"></i>
-			</div>
-	</div>
 
 	</div>
 	<%if (data.system_message != '') { %>
@@ -440,14 +471,17 @@
 					developerPanelLoadingStatus: 'notLoaded',
 					developerPanelActiveSection: 'panelDevHome',
 					pageItems: [],
+					developerMainPageItems: [],
+					developerManagePageItems: [],
+					developerShowcasePageItems: [],
 					developerPanels: [
 						{
 							idCode: 'panelDevHome',
-							title: 'Home'
+							title: 'Most Used'
 						},
 						{
 							idCode: 'panelManageItems',
-							title: 'Manage Items'
+							title: 'Item Types'
 						},
 						{
 							idCode: 'panelShowcases',
@@ -458,10 +492,11 @@
 				methods: {
 					toggleDeveloperPanel: function () {
 						this.developerPanelStatus = this.developerPanelStatus == 'hide' ? 'show' : 'hide';
+						$(".developerPanel").fadeIn(100);
 						if (this.developerPanelStatus == "show") {
-							//$(".developerPanel").fadeIn(100);
-							$(".developerPanelWait").fadeIn(100);
 							this.loadPanelData();
+						} else {
+							$(".developerPanel").fadeOut(100);
 						}
 					},
 					initialize: function () {
@@ -478,13 +513,16 @@
 						}).then(responseObject => {
 							const response = qsys.getResponse(responseObject);
 							this.pageItems = response.data.pageItems;
+							this.developerMainPageItems = response.data.developerMainPageItems;
+							this.developerManagePageItems = response.data.developerManagePageItems;
+							this.developerShowcasePageItems = response.data.developerShowcasePageItems;
 							this.developerPanelLoadingStatus = 'loaded';
+							$(".developerPanel").fadeIn(100);
 						}).catch(function (error) {
 							this.developerPanelLoadingStatus = 'failed';
 						});
 					},
 					changeSection: function (section) {
-						console.log(section);
 						this.developerPanelActiveSection = section;
 					}
 				}
