@@ -348,47 +348,39 @@
 					<div class="d-inline d-sm-none">
 						<div class="devPanelMenuAreaSmartphone">
 							<span class="devPanelMenuLinkSmartphone"
-								:class="[developerPanelActiveSection == 'quickAccess' ? 'devPanelMenuLinkSmartphoneSelected' : 'devPanelMenuLinkSmartphoneUnselected']"
-								@click="changeSection('quickAccess')">
-								Quick Access</span> |
+								:class="[developerPanelActiveSection == 'panelMostUsed' ? 'devPanelMenuLinkSmartphoneSelected' : 'devPanelMenuLinkSmartphoneUnselected']"
+								@click="changeSection('panelMostUsed')">
+								Main Tools</span> |
 							<span class="devPanelMenuLinkSmartphone"
-								:class="[developerPanelActiveSection == 'pageManager' ? 'devPanelMenuLinkSmartphoneSelected' : 'devPanelMenuLinkSmartphoneUnselected']"
-								@click="changeSection('pageManager')">
-								Page Manager</span> |
+								:class="[developerPanelActiveSection == 'panelManageItems' ? 'devPanelMenuLinkSmartphoneSelected' : 'devPanelMenuLinkSmartphoneUnselected']"
+								@click="changeSection('panelManageItems')">
+								Manage Items</span> |
 							<span class="devPanelMenuLinkSmartphone"
-								:class="[developerPanelActiveSection == 'users' ? 'devPanelMenuLinkSmartphoneSelected' : 'devPanelMenuLinkSmartphoneUnselected']"
-								@click="changeSection('users')">
-								Users</span>
+								:class="[developerPanelActiveSection == 'panelShowcases' ? 'devPanelMenuLinkSmartphoneSelected' : 'devPanelMenuLinkSmartphoneUnselected']"
+								@click="changeSection('panelShowcases')">
+								Showcases</span>
 						</div>
 					</div>
 
 					<!-- MENU: COMPUTER -->
 					<div class="d-none d-sm-inline">
 						<div class="devPanelMenuArea">
-							<div class="devPanelMenuLink"
-								:class="[developerPanelActiveSection == 'quickAccess' ? 'devPanelMenuLinkSelected' : 'devPanelMenuLinkUnselected']"
-								@click="changeSection('quickAccess')">
-								Quick Access</div>
-							<div class="devPanelMenuLink"
-								:class="[developerPanelActiveSection == 'pageManager' ? 'devPanelMenuLinkSelected' : 'devPanelMenuLinkUnselected']"
-								@click="changeSection('pageManager')">
-								Page Manager</div>
-							<div class="devPanelMenuLink"
-								:class="[developerPanelActiveSection == 'users' ? 'devPanelMenuLinkSelected' : 'devPanelMenuLinkUnselected']"
-								@click="changeSection('users')">
-								Users</div>
+							<div v-for="developerPanel in developerPanels" class="devPanelMenuLink"
+								:class="[developerPanelActiveSection == developerPanel.idCode ? 'devPanelMenuLinkSelected' : 'devPanelMenuLinkUnselected']"
+								@click="changeSection(developerPanel.idCode)">
+								{{developerPanel.title}}</div>
 						</div>
 					</div>
 
 					<div class="devPanelContentAreaWrapper">
 						<div class="devPanelContentArea"
-							:class="[developerPanelActiveSection == 'quickAccess' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
+							:class="[developerPanelActiveSection == 'panelDevHome' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
 							<a href="batchImport">Batch Import</a></div>
 						<div class="devPanelContentArea"
-							:class="[developerPanelActiveSection == 'pageManager' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
+							:class="[developerPanelActiveSection == 'panelManageItems' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
 							222</div>
 						<div class="devPanelContentArea"
-							:class="[developerPanelActiveSection == 'users' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
+							:class="[developerPanelActiveSection == 'panelShowcases' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
 							333</div>
 					</div>
 
@@ -434,8 +426,22 @@
 				data: {
 					developerPanelStatus: 'hide',
 					developerPanelLoadingStatus: 'notLoaded',
-					developerPanelActiveSection: 'quickAccess',
-					pageItems: []
+					developerPanelActiveSection: 'panelDevHome',
+					pageItems: [],
+					developerPanels: [
+						{
+							idCode: 'panelDevHome',
+							title: 'Home'
+						},
+						{
+							idCode: 'panelManageItems',
+							title: 'Manage Items'
+						},
+						{
+							idCode: 'panelShowcases',
+							title: 'Showcases'
+						}
+					]
 				},
 				methods: {
 					toggleDeveloperPanel: function () {
@@ -465,6 +471,7 @@
 						});
 					},
 					changeSection: function (section) {
+						console.log(section);
 						this.developerPanelActiveSection = section;
 					}
 				}
