@@ -14,6 +14,114 @@
 	<link rel="stylesheet" type="text/css" href="systemCss/system_layout_bootstrap.css" />
 
 
+	<style>
+		.developerPanel {
+			background-color: #eee;
+			border-top: 1px solid rgb(70, 70, 184);
+			border-bottom: 1px solid rgb(70, 70, 184);
+			font-family: 'Courier New', Courier, monospace;
+			color: navy;
+		}
+
+		.developerPanelLink {
+			cursor: pointer;
+			color: rgb(70, 70, 184) !important;
+		}
+
+		.developerPanelWaitSpinner {
+			font-size: 36px;
+			color: navy;
+			opacity: .4;
+		}
+
+		.devPanelMenuArea {
+			height: 100%;
+		}
+
+		.devPanelMenuLink {
+			height: 50px;
+			display: block;
+			width: 100%;
+			border-top: 1px solid #bbb;
+			border-left: 1px solid #bbb;
+			border-right: 1px solid #bbb;
+			padding: 10px;
+		}
+
+		.devPanelMenuLink:last-of-type {
+			border-bottom: 1px solid red;
+		}
+
+		.devPanelMenuLinkSelected {
+			color: #111;
+			font-weight: bold !important;
+			cursor: default !important;
+			background-color: #bbb;
+		}
+
+		.devPanelMenuLinkUnselected {
+			color: #444;
+			cursor: pointer;
+			background-color: #aaa;
+		}
+
+		.devPanelContentAreaSelected {
+			display: block;
+		}
+
+		.devPanelContentAreaUnselected {
+			display: none;
+		}
+
+		.devPanelMenuLinkSmartphoneSelected {
+			font-weight: bold;
+			color: #888;
+		}
+
+		.devPanelMenuLinkSmartphoneUnselected {
+			font-weight: normal;
+		}
+
+		/* smartphone view */
+		@media (max-width: 577px) {
+			.developerPanelWrapper {
+				display: block;
+				padding: 20px;
+			}
+
+			.developerPanelWrapper .devPanelMenuLinkSmartphone {
+				cursor: pointer;
+			}
+
+			.devPanelContentAreaWrapper {
+				background-color: #eee;
+			}
+
+			.devPanelMenuAreaSmartphone {
+				border-bottom: 1px solid #ddd;
+				padding-bottom: 10px;
+				margin-bottom: 10px;
+				color: #aaa;
+			}
+		}
+
+		/* tablet/computer view */
+		@media (min-width: 578px) {
+			.developerPanelWrapper {
+				display: flex;
+				flex-direction: row;
+				align-content: stretch;
+			}
+
+
+			.devPanelContentAreaWrapper {
+				background-color: #eee;
+				flex-grow: 1;
+				position: relative;
+				padding: 10px;
+			}
+		}
+	</style>
 
 </head>
 
@@ -22,235 +130,344 @@
 
 
 
-	<%if (data.system_configDeveloping) {%>
-	<script>
-		$(function () {
-			if (false && navigator.userAgent != '<%=data.system_developingAllowedBrowserSignature%>') {
-				console.log(navigator.userAgent);
-				$('body').hide();
-			}
-		});
-	</script>
-	<nav class="navbar navbar-expand-lg navbar-light bg-light developerMode">
-		<% } else { %>
-		<nav class="navbar navbar-expand-lg navbar-light bg-light">
-			<% } %>
-			<span class="navbar-brand">
-				<a href="home" class="applicationShortTitle">
-					<% if(data.system_siteMode=='parked') {%><% if(!data.system_isOnline) {%>:<% }%><% }%><%=data.system_menu_title%></a>
-			</span>
-			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-				aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+	<%if (true) {%>
 
-				<ul class="navbar-nav mr-auto">
+	<div id="appMenu">
+		<nav class="navbar navbar-expand-lg navbar-light bg-light developerMode">
+			<% } else { %>
+			<nav class="navbar navbar-expand-lg navbar-light bg-light">
+				<% } %>
+				<span class="navbar-brand">
+					<a href="home" class="applicationShortTitle">
+						<% if(data.system_siteMode=='parked') {%><% if(!data.system_isOnline) {%>:<% }%><% }%><%=data.system_menu_title%></a>
+				</span>
+				<button class="navbar-toggler" type="button" data-toggle="collapse"
+					data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+					aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+				<div class="collapse navbar-collapse" id="navbarSupportedContent">
 
-					<%
+					<ul class="navbar-nav mr-auto">
+
+						<%
                     // MAIN MENU
                     %>
-					<% data.system_mainMenuPageItems.forEach(function(item, index) { %>
-					<li class="nav-item active">
-						<%if (item.idCode != "home") {%>
-						<%if (item.idCode == data.system_currentPageItem.idCode) { %>
-						<a class="nav-link pageSelected" href="<%= item.idCode %>">
-							<%= item.title %></a>
-						<% } else { %>
-						<a class="nav-link" href="<%= item.idCode %>">
-							<%= item.title %></a>
-						<% } %>
-						<% } %>
-					</li>
-					<% }); %>
-
-
-					<%
-                    // (((DROPDOWN)))
-                    %>
-					<% if(data.system_submainMenuPageItems.length > 0) {%>
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-							data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">MORE</a>
-						<div class="dropdown-menu" aria-labelledby="navbarDropdown">
-
-							<%
-                            // =============== SUBMAIN
-                            %>
-							<% data.system_submainMenuPageItems.forEach(function(item, index) { %>
+						<% data.system_mainMenuPageItems.forEach(function(item, index) { %>
+						<li class="nav-item active">
+							<%if (item.idCode != "home") {%>
 							<%if (item.idCode == data.system_currentPageItem.idCode) { %>
-							<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
+							<a class="nav-link pageSelected" href="<%= item.idCode %>">
 								<%= item.title %></a>
 							<% } else { %>
-							<a class="dropdown-item" href="<%= item.idCode %>">
-								<!--displayOrder-->
-								<%= item.title %> <span style="display:none; font-size: 11px; color: #ccc">
-									<%= item.displayOrder %></span></a>
+							<a class="nav-link" href="<%= item.idCode %>">
+								<%= item.title %></a>
 							<% } %>
-							<% }); %>
+							<% } %>
+						</li>
+						<% }); %>
 
-						</div>
-					</li>
-					<%}%>
+
+						<%
+                    // (((DROPDOWN)))
+                    %>
+						<% if(data.system_submainMenuPageItems.length > 0) {%>
+						<li class="nav-item dropdown">
+							<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+								data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">MORE</a>
+							<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+
+								<%
+                            // =============== SUBMAIN
+                            %>
+								<% data.system_submainMenuPageItems.forEach(function(item, index) { %>
+								<%if (item.idCode == data.system_currentPageItem.idCode) { %>
+								<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
+									<%= item.title %></a>
+								<% } else { %>
+								<a class="dropdown-item" href="<%= item.idCode %>">
+									<!--displayOrder-->
+									<%= item.title %> <span style="display:none; font-size: 11px; color: #ccc">
+										<%= item.displayOrder %></span></a>
+								<% } %>
+								<% }); %>
+
+							</div>
+						</li>
+						<%}%>
 
                     <%
                     // (((DROPDOWN)))
                     %>
-					<% if(data.system_userIsDeveloper && data.system_totalNumberOfDeveloperPages > 0) {%>
-					<li class="nav-item dropdown">
-						<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-							data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">DEVELOPER</a>
-						<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+						<% if(data.system_userIsDeveloper && data.system_totalNumberOfDeveloperPages > 0) {%>
+						<li class="nav-item dropdown">
+							<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+								data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">DEVELOPER</a>
+							<div class="dropdown-menu" aria-labelledby="navbarDropdown">
 
 
-							<%
+								<%
                             // =============== DEVELOPER CUSTOM MANAGE
                             %>
-							<% data.system_developerCustomManageMenuPageItems.forEach(function(item, index) { %>
-							<%if (item.idCode == data.system_currentPageItem.idCode) { %>
-							<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
-								<%= item.title %></a>
-							<% } else { %>
-							<a class="dropdown-item" href="<%= item.idCode %>">
-								<!--displayOrder-->
-								<%= item.title %> <span style="display:none; font-size: 11px; color: #ccc">
-									<%= item.displayOrder %></span></a>
-							<% } %>
-							<% }); %>
-							<% if(data.system_developerCustomManageMenuPageItems.length > 0) { %>
-							<div class="dropdown-divider"></div>
-							<% } %>
+								<% data.system_developerCustomManageMenuPageItems.forEach(function(item, index) { %>
+								<%if (item.idCode == data.system_currentPageItem.idCode) { %>
+								<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
+									<%= item.title %></a>
+								<% } else { %>
+								<a class="dropdown-item" href="<%= item.idCode %>">
+									<!--displayOrder-->
+									<%= item.title %> <span style="display:none; font-size: 11px; color: #ccc">
+										<%= item.displayOrder %></span></a>
+								<% } %>
+								<% }); %>
+								<% if(data.system_developerCustomManageMenuPageItems.length > 0) { %>
+								<div class="dropdown-divider"></div>
+								<% } %>
 
-							<%
+								<%
                             // =============== DEVELOPER MAIN
                             %>
-							<% data.system_developerMainMenuPageItems.forEach(function(item, index) { %>
-							<%if (item.idCode == data.system_currentPageItem.idCode) { %>
-							<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
-								<%= item.title %></a>
-							<% } else { %>
-							<a class="dropdown-item" href="<%= item.idCode %>">
-								<!--displayOrder-->
-								<%= item.title %> <span style="display:none; font-size: 11px; color: #ccc">
-									<%= item.displayOrder %></span></a>
-							<% } %>
-							<% }); %>
-							<% if(data.system_developerMainMenuPageItems.length > 0) { %>
-							<div class="dropdown-divider"></div>
-							<% } %>
+								<% data.system_developerMainMenuPageItems.forEach(function(item, index) { %>
+								<%if (item.idCode == data.system_currentPageItem.idCode) { %>
+								<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
+									<%= item.title %></a>
+								<% } else { %>
+								<a class="dropdown-item" href="<%= item.idCode %>">
+									<!--displayOrder-->
+									<%= item.title %> <span style="display:none; font-size: 11px; color: #ccc">
+										<%= item.displayOrder %></span></a>
+								<% } %>
+								<% }); %>
+								<% if(data.system_developerMainMenuPageItems.length > 0) { %>
+								<div class="dropdown-divider"></div>
+								<% } %>
 
-							<%
+								<%
                             // =============== DEVELOPER SYSTEM MANAGE
                             %>
-							<% data.system_developerSystemManageMenuPageItems.forEach(function(item, index) { %>
-							<%if (item.idCode == data.system_currentPageItem.idCode) { %>
-							<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
-								<%= item.title %></a>
-							<% } else { %>
-							<a class="dropdown-item" href="<%= item.idCode %>">
-								<%= item.title %></a>
-							<% } %>
-							<% }); %>
-							<% if(data.system_developerSystemManageMenuPageItems.length > 0) { %>
-							<div class="dropdown-divider"></div>
-							<% } %>
+								<% data.system_developerSystemManageMenuPageItems.forEach(function(item, index) { %>
+								<%if (item.idCode == data.system_currentPageItem.idCode) { %>
+								<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
+									<%= item.title %></a>
+								<% } else { %>
+								<a class="dropdown-item" href="<%= item.idCode %>">
+									<%= item.title %></a>
+								<% } %>
+								<% }); %>
+								<% if(data.system_developerSystemManageMenuPageItems.length > 0) { %>
+								<div class="dropdown-divider"></div>
+								<% } %>
 
-							<%
+								<%
                             // =============== DEVELOPER SHOWCASES
                             %>
-							<% data.system_developerShowcaseMenuPageItems.forEach(function(item, index) { %>
-							<%if (item.idCode == data.system_currentPageItem.idCode) { %>
-							<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
-								<%= item.title %></a>
-							<% } else { %>
-							<a class="dropdown-item" href="<%= item.idCode %>">
-								<%= item.title %></a>
-							<% } %>
-							<% }); %>
-							<% if(data.system_developerShowcaseMenuPageItems.length > 0) { %>
-							<div class="dropdown-divider"></div>
-							<% } %>
+								<% data.system_developerShowcaseMenuPageItems.forEach(function(item, index) { %>
+								<%if (item.idCode == data.system_currentPageItem.idCode) { %>
+								<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
+									<%= item.title %></a>
+								<% } else { %>
+								<a class="dropdown-item" href="<%= item.idCode %>">
+									<%= item.title %></a>
+								<% } %>
+								<% }); %>
+								<% if(data.system_developerShowcaseMenuPageItems.length > 0) { %>
+								<div class="dropdown-divider"></div>
+								<% } %>
 
-							<%
+								<%
                             // =============== DEVELOPER SELDOM
                             %>
-							<% data.system_developerSeldomMenuPageItems.forEach(function(item, index) { %>
-							<%if (item.idCode == data.system_currentPageItem.idCode) { %>
-							<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
-								<%= item.title %></a>
-							<% } else { %>
-							<a class="dropdown-item" href="<%= item.idCode %>">
-								<%= item.title %></a>
-							<% } %>
-							<% }); %>
-							<% if(data.system_developerSeldomMenuPageItems.length > 0) { %>
-							<div class="dropdown-divider"></div>
-							<% } %>
+								<% data.system_developerSeldomMenuPageItems.forEach(function(item, index) { %>
+								<%if (item.idCode == data.system_currentPageItem.idCode) { %>
+								<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
+									<%= item.title %></a>
+								<% } else { %>
+								<a class="dropdown-item" href="<%= item.idCode %>">
+									<%= item.title %></a>
+								<% } %>
+								<% }); %>
+								<% if(data.system_developerSeldomMenuPageItems.length > 0) { %>
+								<div class="dropdown-divider"></div>
+								<% } %>
 
 
-							<%
+								<%
                             // =============== LOGIN/LOGOUT
                             %>
-							<% data.system_loginAreaMenuPageItems.forEach(function(item, index) { %>
-							<%if (item.idCode == data.system_currentPageItem.idCode) { %>
-							<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
-								<%= item.title %></a>
-							<% } else { %>
-							<a class="dropdown-item" href="<%= item.idCode %>">
-								<%= item.title %></a>
-							<% } %>
-							<% }); %>
-						</div>
-					</li>
-					<%}%>
+								<% data.system_loginAreaMenuPageItems.forEach(function(item, index) { %>
+								<%if (item.idCode == data.system_currentPageItem.idCode) { %>
+								<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
+									<%= item.title %></a>
+								<% } else { %>
+								<a class="dropdown-item" href="<%= item.idCode %>">
+									<%= item.title %></a>
+								<% } %>
+								<% }); %>
+							</div>
+						</li>
+						<%}%>
 
+					<%
+					// DEVELOPER PANEL LINK
+					
+						%><% if(data.system_userIsDeveloper && data.system_totalNumberOfDeveloperPages > 0) {%>
+						<li class="nav-item active">
+							<a class="nav-link developerPanelLink prohibitSelectionClickable"
+								@click="toggleDeveloperPanel">DEVELOPER</a>
+						</li>
+						<%}%>
 
-                <%
+						<%
                     // LOGIN AREA
                 %>
-					<% data.system_loginAreaMenuPageItems.forEach(function(item, index) { %>
-					<li class="nav-item active">
-						<%if (item.idCode != "home") {%>
-						<%if (item.idCode == data.system_currentPageItem.idCode) { %>
-						<a class="nav-link pageSelected" href="<%= item.idCode %>">
-							<%= item.title %></a>
-						<% } else { %>
-						<a class="nav-link" href="<%= item.idCode %>">
-							<%= item.title %></a>
-						<% } %>
-						<% } %>
-					</li>
-					<% }); %>
+						<% data.system_loginAreaMenuPageItems.forEach(function(item, index) { %>
+						<li class="nav-item active">
+							<%if (item.idCode != "home") {%>
+							<%if (item.idCode == data.system_currentPageItem.idCode) { %>
+							<a class="nav-link pageSelected" href="<%= item.idCode %>">
+								<%= item.title %></a>
+							<% } else { %>
+							<a class="nav-link" href="<%= item.idCode %>">
+								<%= item.title %></a>
+							<% } %>
+							<% } %>
+						</li>
+						<% }); %>
 
 
-				</ul>
+					</ul>
 
+				</div>
+			</nav>
+
+
+			<div style="display:none" class="developerPanel" v-show="developerPanelStatus=='show'">
+				<div v-show="developerPanelLoadingStatus == 'loaded'" class="developerPanelWrapper">
+
+					<!-- MENU: SMARTPHONE -->
+					<div class="d-inline d-sm-none">
+						<div class="devPanelMenuAreaSmartphone">
+							<span class="devPanelMenuLinkSmartphone"
+								:class="[developerPanelActiveSection == 'quickAccess' ? 'devPanelMenuLinkSmartphoneSelected' : 'devPanelMenuLinkSmartphoneUnselected']"
+								@click="changeSection('quickAccess')">
+								Quick Access</span> |
+							<span class="devPanelMenuLinkSmartphone"
+								:class="[developerPanelActiveSection == 'pageManager' ? 'devPanelMenuLinkSmartphoneSelected' : 'devPanelMenuLinkSmartphoneUnselected']"
+								@click="changeSection('pageManager')">
+								Page Manager</span> |
+							<span class="devPanelMenuLinkSmartphone"
+								:class="[developerPanelActiveSection == 'users' ? 'devPanelMenuLinkSmartphoneSelected' : 'devPanelMenuLinkSmartphoneUnselected']"
+								@click="changeSection('users')">
+								Users</span>
+						</div>
+					</div>
+
+					<!-- MENU: COMPUTER -->
+					<div class="d-none d-sm-inline">
+						<div class="devPanelMenuArea">
+							<div class="devPanelMenuLink"
+								:class="[developerPanelActiveSection == 'quickAccess' ? 'devPanelMenuLinkSelected' : 'devPanelMenuLinkUnselected']"
+								@click="changeSection('quickAccess')">
+								Quick Access</div>
+							<div class="devPanelMenuLink"
+								:class="[developerPanelActiveSection == 'pageManager' ? 'devPanelMenuLinkSelected' : 'devPanelMenuLinkUnselected']"
+								@click="changeSection('pageManager')">
+								Page Manager</div>
+							<div class="devPanelMenuLink"
+								:class="[developerPanelActiveSection == 'users' ? 'devPanelMenuLinkSelected' : 'devPanelMenuLinkUnselected']"
+								@click="changeSection('users')">
+								Users</div>
+						</div>
+					</div>
+
+					<div class="devPanelContentAreaWrapper">
+						<div class="devPanelContentArea"
+							:class="[developerPanelActiveSection == 'quickAccess' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
+							<a href="batchImport">Batch Import</a></div>
+						<div class="devPanelContentArea"
+							:class="[developerPanelActiveSection == 'pageManager' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
+							222</div>
+						<div class="devPanelContentArea"
+							:class="[developerPanelActiveSection == 'users' ? 'devPanelContentAreaSelected' : 'devPanelContentAreaUnselected']">
+							333</div>
+					</div>
+
+				</div>
+				<div v-show="developerPanelLoadingStatus != 'loaded'" class="developerPanelWait">
+					<i class="fa fa-cog fa-spin developerPanelWaitSpinner"></i>
+				</div>
 			</div>
-		</nav>
-		<%if (data.system_message != '') { %>
-		<div class="alert alert-warning" role="alert">
-			<%-data.system_message%>
-		</div>
-		<hr />
-		<%} %>
-		<div class="system_page_content">
 
-			<% 
+	</div>
+	<%if (data.system_message != '') { %>
+	<div class="alert alert-warning" role="alert">
+		<%-data.system_message%>
+	</div>
+	<hr />
+	<%} %>
+	<div class="system_page_content">
+
+		<% 
 		// To work on Datapod in developing mode (so you stay logged in even when you make changes to files), 
 		// you have to change "exports.developing" to true in config.js. When you do this, the section of code
 		// below will notify you that you have to login again and will provide a link to the login page.
 		if(data.system_developing && data.system_currentUser.login != 'dev' ) { %>
 
-			<div style="background-color: #555; color: ivory; padding: 20px 20px 10px 20px; border: 3px solid #333">
-				<ul>
-					<li><code style="color:red">config.developing()</code> has been set to <span
-							style="color:orange">true</span></li>
-					<li>i.e. you are now in <span style="color:orange">developing mode</span></li>
-					<li>please <a href="login" style="background-color:yellow; color: black">login</a> as developer</li>
-					<li>you will stay logged in as developer even when you make changes to the code which restarts the
-						node server</li>
-					<li>when you log out as developer, <code style="color:red">config.developing()</code> will
-						automatically be set to <span style="color:orange">false</span></li>
-				</ul>
-			</div>
-			<% } %>
+		<div style="background-color: #555; color: ivory; padding: 20px 20px 10px 20px; border: 3px solid #333">
+			<ul>
+				<li><code style="color:red">config.developing()</code> has been set to <span
+						style="color:orange">true</span></li>
+				<li>i.e. you are now in <span style="color:orange">developing mode</span></li>
+				<li>please <a href="login" style="background-color:yellow; color: black">login</a> as developer</li>
+				<li>you will stay logged in as developer even when you make changes to the code which restarts the
+					node server</li>
+				<li>when you log out as developer, <code style="color:red">config.developing()</code> will
+					automatically be set to <span style="color:orange">false</span></li>
+			</ul>
+		</div>
+		<% } %>
+
+
+		<script>
+			const appMenu = new Vue({
+				el: '#appMenu',
+				data: {
+					developerPanelStatus: 'hide',
+					developerPanelLoadingStatus: 'notLoaded',
+					developerPanelActiveSection: 'quickAccess',
+					pageItems: []
+				},
+				methods: {
+					toggleDeveloperPanel: function () {
+						this.developerPanelStatus = this.developerPanelStatus == 'hide' ? 'show' : 'hide';
+						if (this.developerPanelStatus == "show") {
+							$(".developerPanel").fadeIn(100);
+							this.loadPanelData();
+						}
+					},
+					initialize: function () {
+
+					},
+					loadPanelData: function () {
+						this.developerPanelLoadingStatus = 'loading';
+						axios({
+							method: 'post',
+							url: 'controllerSystemDeveloperPanel',
+							data: {
+								action: 'loadPanelData'
+							}
+						}).then(responseObject => {
+							const response = qsys.getResponse(responseObject);
+							this.pageItems = response.data.pageItems;
+							this.developerPanelLoadingStatus = 'loaded';
+						}).catch(function (error) {
+							this.developerPanelLoadingStatus = 'failed';
+						});
+					},
+					changeSection: function (section) {
+						this.developerPanelActiveSection = section;
+					}
+				}
+			});
+			appMenu.initialize();
+		</script>
