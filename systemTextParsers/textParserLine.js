@@ -91,7 +91,7 @@ class TextParserLine {
 			if (qdat.isStandardDate(this.content)) {
 				//this.html = `<b>${this.html}</b>`;
 				//this.html = `<b>${qdat.getShortMonthWithWeekDay(this.content)}</b>`;
-				this.html = `<span class="theDateLine">${qdat.getShortMonthWithWeekDayGerman(this.content, { fullWeekDay: true })}</class>`;
+				this.html = `<span class="theDateLine">${qdat.getShortMonthWithWeekDay(this.content, { fullWeekDay: true })}</class>`;
 			}
 		}
 
