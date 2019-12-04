@@ -56,140 +56,144 @@ const ControllerShowcaseRegexParser = require('../systemControllers/controllerSh
 const ControllerShowcaseScreenScraping = require('../systemControllers/controllerShowcaseScreenScraping'); //:showcaseScreenScraping
 const ControllerShowcaseLoadDataWithMultiplePromises = require('../systemControllers/controllerShowcaseLoadDataWithMultiplePromises'); //:showcaseLoadDataWithMultiplePromises
 const ControllerShowcaseLoadFromMultipleDataSources = require('../systemControllers/controllerShowcaseLoadFromMultipleDataSources'); //:showcaseLoadFromMultipleDataSources
+const ControllerSystemDeveloperPanel = require('../systemControllers/controllerSystemDeveloperPanel');
+
 
 exports.instantiate = function (controllerIdCode, request, response) {
 	switch (controllerIdCode) {
 		case 'controller':
 			return new Controller(request, response);
-//DYNAMIC_CODE_AREA:switchBlock,2
-case 'controllerShowcaseFormAndAjaxControls': //:pageShowcaseFormAndAjaxControls
-return new ControllerShowcaseFormAndAjaxControls(request, response);
-case 'controllerDeletePage': //:deletePage
-return new ControllerDeletePage(request, response);
-case 'controllerCreatePage': //:createPage
-return new ControllerCreatePage(request, response);
-case 'controllerShowcaseTextParser': //:showcaseTextParser
-return new ControllerShowcaseTextParser(request, response);
-case 'controllerCreateClass': //:createClass
-return new ControllerCreateClass(request, response);
-case 'controllerShowcaseFormToEditDatabase': //:showcaseFormToEditDatabase
-return new ControllerShowcaseFormToEditDatabase(request, response);
-case 'controllerShowcaseParseItemTypeDefinitionBlock': //:showcaseParseItemTypeDefinitionBlock
-return new ControllerShowcaseParseItemTypeDefinitionBlock(request, response);
-case 'controllerShowcaseFormCodeBlocks': //:showcaseFormCodeBlocks
-return new ControllerShowcaseFormCodeBlocks(request, response);
-case 'controllerLogout': //:logout
-return new ControllerLogout(request, response);
-case 'controllerLogin': //:login
-return new ControllerLogin(request, response);
-case 'controllerShowcaseCreatePdf': //:showcaseCreatePdf
-return new ControllerShowcaseCreatePdf(request, response);
-case 'controllerShowcaseCreatePdfReport': //:showcaseCreatePdfReport
-return new ControllerShowcaseCreatePdfReport(request, response);
-case 'controllerShowcaseJavaScriptSorting': //:showcaseJavaScriptSorting
-return new ControllerShowcaseJavaScriptSorting(request, response);
-case 'controllerShowcaseReadXmlFile': //:showcaseReadXmlFile
-return new ControllerShowcaseReadXmlFile(request, response);
-case 'controllerCreateItemType': //:createItemType
-return new ControllerCreateItemType(request, response);
-case 'controllerShowcaseDpDataLoader': //:showcaseDpDataLoader
-return new ControllerShowcaseDpDataLoader(request, response);
-case 'controllerShowcaseDisplayDataFromSqlStatement': //:showcaseDisplayDataFromSqlStatement
-return new ControllerShowcaseDisplayDataFromSqlStatement(request, response);
-case 'controllerCreatePageBuilder': //:createPageBuilder
-return new ControllerCreatePageBuilder(request, response);
-case 'controllerDeleteItemType': //:deleteItemType
-return new ControllerDeleteItemType(request, response);
-case 'controllerShowcaseCreateShowcaseBook': //:showcaseCreateShowcaseBook
-return new ControllerShowcaseCreateShowcaseBook(request, response);
-case 'controllerManagePageItems': //:managePageItems
-return new ControllerManagePageItems(request, response);
-case 'controllerManagePageItem': //:managePageItem
-return new ControllerManagePageItem(request, response);
-case 'controllerManageShowcaseBook': //:manageShowcaseBook
-return new ControllerManageShowcaseBook(request, response);
-case 'controllerManageUsers': //:manageUsers
-return new ControllerManageUsers(request, response);
-case 'controllerManageUser': //:manageUser
-return new ControllerManageUser(request, response);
-case 'controllerShowcaseBestEcmascript6Features': //:showcaseBestEcmascript6Features
-return new ControllerShowcaseBestEcmascript6Features(request, response);
-case 'controllerShowcaseEditXmlFile': //:showcaseEditXmlFile
-return new ControllerShowcaseEditXmlFile(request, response);
-case 'controllerManageItemTypes': //:manageItemTypes
-return new ControllerManageItemTypes(request, response);
-case 'controllerManageItemTypes':
-return new ControllerManageItemTypes(request, response);
-case 'controllerManageItemType': //:manageItemType
-return new ControllerManageItemType(request, response);
-case 'controllerShowcaseMultipleSqlStatements': //:showcaseMultipleSqlStatements
-return new ControllerShowcaseMultipleSqlStatements(request, response);
-case 'controllerShowcaseMultipleAjaxSteps': //:showcaseMultipleAjaxSteps
-return new ControllerShowcaseMultipleAjaxSteps(request, response);
-case 'controllerShowcaseMultipleAjaxStepsWithNodeRestarts': //:showcaseMultipleAjaxStepsWithNodeRestarts
-return new ControllerShowcaseMultipleAjaxStepsWithNodeRestarts(request, response);
-case 'controllerShowcaseSearchAndDisplayItemType': //:showcaseSearchAndDisplayItemType
-return new ControllerShowcaseSearchAndDisplayItemType(request, response);
-case 'controllerCreateDataType': //:createDataType
-return new ControllerCreateDataType(request, response);
-case 'controllerShowcaseUser': //:showcaseUser
-return new ControllerShowcaseUser(request, response);
-case 'controllerAddFieldToItemType': //:addFieldToItemType
-return new ControllerAddFieldToItemType(request, response);
-case 'controllerManageShowcaseUsers': //:manageShowcaseUsers
-return new ControllerManageShowcaseUsers(request, response);
-case 'controllerManageShowcaseUsers':
-return new ControllerManageShowcaseUsers(request, response);
-case 'controllerManageShowcaseUser': //:manageShowcaseUser
-return new ControllerManageShowcaseUser(request, response);
-case 'controllerShowcasePageState': //:showcasePageState
-return new ControllerShowcasePageState(request, response);
-case 'controllerShowcaseMobileDevelopment': //:showcaseMobileDevelopment
-return new ControllerShowcaseMobileDevelopment(request, response);
-case 'controllerShowcaseEs6Promise': //:showcaseEs6Promise
-return new ControllerShowcaseEs6Promise(request, response);
-case 'controllerShowcaseLoadDataWithPromises': //:showcaseLoadDataWithPromises
-return new ControllerShowcaseLoadDataWithPromises(request, response);
-case 'controllerShowcaseES6MapFunction': //:showcaseES6MapFunction
-return new ControllerShowcaseES6MapFunction(request, response);
-case 'controllerHome': //:home
-return new ControllerHome(request, response);
-case 'controllerManageSystemTexts': //:manageSystemTexts
-return new ControllerManageSystemTexts(request, response);
-case 'controllerManageSystemText': //:manageSystemText
-return new ControllerManageSystemText(request, response);
-case 'controllerShowcaseTypeScript': //:showcaseTypeScript
-return new ControllerShowcaseTypeScript(request, response);
-case 'controllerShowcaseSliders': //:showcaseSliders
-return new ControllerShowcaseSliders(request, response);
-case 'controllerShowcaseRegex': //:showcaseRegex
-return new ControllerShowcaseRegex(request, response);
-case 'controllerShowcaseRegexParser': //:showcaseRegexParser
-return new ControllerShowcaseRegexParser(request, response);
-case 'controllerShowcaseScreenScraping': //:showcaseScreenScraping
-return new ControllerShowcaseScreenScraping(request, response);
-case 'controllerShowcaseLoadDataWithMultiplePromises': //:showcaseLoadDataWithMultiplePromises
-return new ControllerShowcaseLoadDataWithMultiplePromises(request, response);
-case 'controllerShowcaseLoadFromMultipleDataSources': //:showcaseLoadFromMultipleDataSources
-return new ControllerShowcaseLoadFromMultipleDataSources(request, response);
-case 'controllerShowcaseMarkdown': //:showcaseMarkdown
-return new ControllerShowcaseMarkdown(request, response);
-case 'controllerShowcaseCustomTextParsing': //:showcaseCustomTextParsing
-return new ControllerShowcaseCustomTextParsing(request, response);
-case 'controllerShowcaseTextChunkDocument': //:showcaseTextChunkDocument
-return new ControllerShowcaseTextChunkDocument(request, response);
-case 'controllerFillItemTypesFromDirectory': //:fillItemTypesFromDirectory
-return new ControllerFillItemTypesFromDirectory(request, response);
-case 'controllerSystemCodeGenerator': //:systemCodeGenerator
-return new ControllerSystemCodeGenerator(request, response);
-case 'controllerBatchImport': //:batchImport
-return new ControllerBatchImport(request, response);
-case 'controllerShowcaseDql': //:showcaseDql
-return new ControllerShowcaseDql(request, response);
-case 'controllerCustomTextTransformations': //:customTextTransformations
-return new ControllerCustomTextTransformations(request, response);
-case 'controllerTest111': //:test111
-return new ControllerTest111(request, response);
+		//DYNAMIC_CODE_AREA:switchBlock,2
+		case 'controllerShowcaseFormAndAjaxControls': //:pageShowcaseFormAndAjaxControls
+			return new ControllerShowcaseFormAndAjaxControls(request, response);
+		case 'controllerDeletePage': //:deletePage
+			return new ControllerDeletePage(request, response);
+		case 'controllerCreatePage': //:createPage
+			return new ControllerCreatePage(request, response);
+		case 'controllerShowcaseTextParser': //:showcaseTextParser
+			return new ControllerShowcaseTextParser(request, response);
+		case 'controllerCreateClass': //:createClass
+			return new ControllerCreateClass(request, response);
+		case 'controllerShowcaseFormToEditDatabase': //:showcaseFormToEditDatabase
+			return new ControllerShowcaseFormToEditDatabase(request, response);
+		case 'controllerShowcaseParseItemTypeDefinitionBlock': //:showcaseParseItemTypeDefinitionBlock
+			return new ControllerShowcaseParseItemTypeDefinitionBlock(request, response);
+		case 'controllerShowcaseFormCodeBlocks': //:showcaseFormCodeBlocks
+			return new ControllerShowcaseFormCodeBlocks(request, response);
+		case 'controllerLogout': //:logout
+			return new ControllerLogout(request, response);
+		case 'controllerLogin': //:login
+			return new ControllerLogin(request, response);
+		case 'controllerShowcaseCreatePdf': //:showcaseCreatePdf
+			return new ControllerShowcaseCreatePdf(request, response);
+		case 'controllerShowcaseCreatePdfReport': //:showcaseCreatePdfReport
+			return new ControllerShowcaseCreatePdfReport(request, response);
+		case 'controllerShowcaseJavaScriptSorting': //:showcaseJavaScriptSorting
+			return new ControllerShowcaseJavaScriptSorting(request, response);
+		case 'controllerShowcaseReadXmlFile': //:showcaseReadXmlFile
+			return new ControllerShowcaseReadXmlFile(request, response);
+		case 'controllerCreateItemType': //:createItemType
+			return new ControllerCreateItemType(request, response);
+		case 'controllerShowcaseDpDataLoader': //:showcaseDpDataLoader
+			return new ControllerShowcaseDpDataLoader(request, response);
+		case 'controllerShowcaseDisplayDataFromSqlStatement': //:showcaseDisplayDataFromSqlStatement
+			return new ControllerShowcaseDisplayDataFromSqlStatement(request, response);
+		case 'controllerCreatePageBuilder': //:createPageBuilder
+			return new ControllerCreatePageBuilder(request, response);
+		case 'controllerDeleteItemType': //:deleteItemType
+			return new ControllerDeleteItemType(request, response);
+		case 'controllerShowcaseCreateShowcaseBook': //:showcaseCreateShowcaseBook
+			return new ControllerShowcaseCreateShowcaseBook(request, response);
+		case 'controllerManagePageItems': //:managePageItems
+			return new ControllerManagePageItems(request, response);
+		case 'controllerManagePageItem': //:managePageItem
+			return new ControllerManagePageItem(request, response);
+		case 'controllerManageShowcaseBook': //:manageShowcaseBook
+			return new ControllerManageShowcaseBook(request, response);
+		case 'controllerManageUsers': //:manageUsers
+			return new ControllerManageUsers(request, response);
+		case 'controllerManageUser': //:manageUser
+			return new ControllerManageUser(request, response);
+		case 'controllerShowcaseBestEcmascript6Features': //:showcaseBestEcmascript6Features
+			return new ControllerShowcaseBestEcmascript6Features(request, response);
+		case 'controllerShowcaseEditXmlFile': //:showcaseEditXmlFile
+			return new ControllerShowcaseEditXmlFile(request, response);
+		case 'controllerManageItemTypes': //:manageItemTypes
+			return new ControllerManageItemTypes(request, response);
+		case 'controllerManageItemTypes':
+			return new ControllerManageItemTypes(request, response);
+		case 'controllerManageItemType': //:manageItemType
+			return new ControllerManageItemType(request, response);
+		case 'controllerShowcaseMultipleSqlStatements': //:showcaseMultipleSqlStatements
+			return new ControllerShowcaseMultipleSqlStatements(request, response);
+		case 'controllerShowcaseMultipleAjaxSteps': //:showcaseMultipleAjaxSteps
+			return new ControllerShowcaseMultipleAjaxSteps(request, response);
+		case 'controllerShowcaseMultipleAjaxStepsWithNodeRestarts': //:showcaseMultipleAjaxStepsWithNodeRestarts
+			return new ControllerShowcaseMultipleAjaxStepsWithNodeRestarts(request, response);
+		case 'controllerShowcaseSearchAndDisplayItemType': //:showcaseSearchAndDisplayItemType
+			return new ControllerShowcaseSearchAndDisplayItemType(request, response);
+		case 'controllerCreateDataType': //:createDataType
+			return new ControllerCreateDataType(request, response);
+		case 'controllerShowcaseUser': //:showcaseUser
+			return new ControllerShowcaseUser(request, response);
+		case 'controllerAddFieldToItemType': //:addFieldToItemType
+			return new ControllerAddFieldToItemType(request, response);
+		case 'controllerManageShowcaseUsers': //:manageShowcaseUsers
+			return new ControllerManageShowcaseUsers(request, response);
+		case 'controllerManageShowcaseUsers':
+			return new ControllerManageShowcaseUsers(request, response);
+		case 'controllerManageShowcaseUser': //:manageShowcaseUser
+			return new ControllerManageShowcaseUser(request, response);
+		case 'controllerShowcasePageState': //:showcasePageState
+			return new ControllerShowcasePageState(request, response);
+		case 'controllerShowcaseMobileDevelopment': //:showcaseMobileDevelopment
+			return new ControllerShowcaseMobileDevelopment(request, response);
+		case 'controllerShowcaseEs6Promise': //:showcaseEs6Promise
+			return new ControllerShowcaseEs6Promise(request, response);
+		case 'controllerShowcaseLoadDataWithPromises': //:showcaseLoadDataWithPromises
+			return new ControllerShowcaseLoadDataWithPromises(request, response);
+		case 'controllerShowcaseES6MapFunction': //:showcaseES6MapFunction
+			return new ControllerShowcaseES6MapFunction(request, response);
+		case 'controllerHome': //:home
+			return new ControllerHome(request, response);
+		case 'controllerManageSystemTexts': //:manageSystemTexts
+			return new ControllerManageSystemTexts(request, response);
+		case 'controllerManageSystemText': //:manageSystemText
+			return new ControllerManageSystemText(request, response);
+		case 'controllerShowcaseTypeScript': //:showcaseTypeScript
+			return new ControllerShowcaseTypeScript(request, response);
+		case 'controllerShowcaseSliders': //:showcaseSliders
+			return new ControllerShowcaseSliders(request, response);
+		case 'controllerShowcaseRegex': //:showcaseRegex
+			return new ControllerShowcaseRegex(request, response);
+		case 'controllerShowcaseRegexParser': //:showcaseRegexParser
+			return new ControllerShowcaseRegexParser(request, response);
+		case 'controllerShowcaseScreenScraping': //:showcaseScreenScraping
+			return new ControllerShowcaseScreenScraping(request, response);
+		case 'controllerShowcaseLoadDataWithMultiplePromises': //:showcaseLoadDataWithMultiplePromises
+			return new ControllerShowcaseLoadDataWithMultiplePromises(request, response);
+		case 'controllerShowcaseLoadFromMultipleDataSources': //:showcaseLoadFromMultipleDataSources
+			return new ControllerShowcaseLoadFromMultipleDataSources(request, response);
+		case 'controllerShowcaseMarkdown': //:showcaseMarkdown
+			return new ControllerShowcaseMarkdown(request, response);
+		case 'controllerShowcaseCustomTextParsing': //:showcaseCustomTextParsing
+			return new ControllerShowcaseCustomTextParsing(request, response);
+		case 'controllerShowcaseTextChunkDocument': //:showcaseTextChunkDocument
+			return new ControllerShowcaseTextChunkDocument(request, response);
+		case 'controllerFillItemTypesFromDirectory': //:fillItemTypesFromDirectory
+			return new ControllerFillItemTypesFromDirectory(request, response);
+		case 'controllerSystemCodeGenerator': //:systemCodeGenerator
+			return new ControllerSystemCodeGenerator(request, response);
+		case 'controllerBatchImport': //:batchImport
+			return new ControllerBatchImport(request, response);
+		case 'controllerShowcaseDql': //:showcaseDql
+			return new ControllerShowcaseDql(request, response);
+		case 'controllerCustomTextTransformations': //:customTextTransformations
+			return new ControllerCustomTextTransformations(request, response);
+		case 'controllerTest111': //:test111
+			return new ControllerTest111(request, response);
+		case 'controllerSystemDeveloperPanel':
+			return new ControllerSystemDeveloperPanel(request, response);
 		default:
 		// TODO: return some error code that can be processed
 	}
