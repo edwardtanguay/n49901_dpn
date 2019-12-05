@@ -199,8 +199,19 @@ class TextParserLine {
 
 		//r = 'AAA' + r + 'BBB';
 
+		// call all other parsing in separate methods here
+		r = this.parseTextToHighlight(r);
+
 		return r;
 	}
+
+	// <H|This is highlighted text.|H>
+	parseTextToHighlight(r) {
+		r = qstr.replaceAll(r, `&lt;H|`, '<span class="outlineHighlight">');
+		r = qstr.replaceAll(r, `|H&gt;`, '</span>');
+		return r;
+	}
+
 }
 
 module.exports = TextParserLine

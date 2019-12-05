@@ -828,3 +828,9 @@ span.standardOutlineButton {
   border-radius: 3px;
   font-size: 80%;
 }
+.outlineHighlight {
+  background-color: #ffffd0;
+}
+.outlineHighlight code {
+  background-color: #ffffd0 !important;
+}
