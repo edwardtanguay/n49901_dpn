@@ -968,3 +968,11 @@ exports.getSubstringAsNumber = function (line, start, end) {
 		return null;
 	}
 }
+
+exports.forceAsInteger = function (string) {
+	return parseInt(string);
+}
+
+exports.forceAsDecimal = function (string) {
+	return parseFloat(string);
+}
