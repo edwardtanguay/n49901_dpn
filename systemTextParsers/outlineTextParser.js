@@ -25,7 +25,7 @@ class OutlineTextParser extends TextParser {
 	}
 
 	parse(options = {}) {
-		const highlightedDateLines = _.has(options, 'highlightedDateLines') ? options.highlightedDateLines : false;
+		const highlightedDateLines = _.has(options, 'highlightedDateLines') ? options.highlightedDateLines : true;
 		const highlightedDateLinesStart = _.has(options, 'highlightedDateLinesStart') ? options.highlightedDateLinesStart : '';
 		if (!qstr.isEmpty(highlightedDateLinesStart)) {
 			this.lines.unshift(highlightedDateLinesStart);
