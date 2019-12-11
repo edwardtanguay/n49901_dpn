@@ -47,7 +47,7 @@ class TextParserLine {
 	}
 
 	parseVideoIdCode() {
-		const regex = /@@([a-zA-Z0-9]*)$/;
+		const regex = /@@([a-zA-Z0-9-]*)$/;
 		const matches = this.content.match(regex)
 		this.content = this.content.replace(regex, '');
 		if (matches != null) {

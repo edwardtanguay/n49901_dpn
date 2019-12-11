@@ -20,7 +20,7 @@ class ControllerSystemDeveloperPanel extends Controller {
 
 			const pageItemObjects = System.instantiateItemObjectsWithRecords('pageItems', data.pageItems);
 			const developerMainPageItems = qarr.multisort(pageItemObjects.filter(item => item.menu == 'developerMain'), ['displayOrder'], ['asc']);
-			const developerManagePageItems = qarr.multisort(pageItemObjects.filter(item => item.menu == 'developerManage'), ['displayOrder'], ['asc']);
+			const developerManagePageItems = qarr.multisort(pageItemObjects.filter(item => item.menu == 'developerManage' || item.menu == 'developerSystemManage'), ['displayOrder'], ['asc']);
 			const developerShowcasePageItems = qarr.multisort(pageItemObjects.filter(item => item.menu == 'developerShowcase'), ['displayOrder'], ['asc']);
 
 			this.responseData.pageItems = pageItemObjects;

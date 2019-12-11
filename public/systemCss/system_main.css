@@ -588,12 +588,6 @@ a:active {
   font-weight: bold;
   background-color: #eee;
 }
-.markdownContent pre {
-  background-color: #eee;
-  border: 1px solid #ccc;
-  padding: 5px 10px;
-  border-radius: 5px;
-}
 .markdownContent pre > code {
   font-size: 12px;
 }
@@ -628,7 +622,7 @@ div.outlineWrapper {
   padding: 0 10px 14px 0;
 }
 ul.outline {
-  list-style: inside;
+  list-style: disc;
   margin: 1px 0 0 0 !important;
 }
 ul.outline li code {
@@ -660,7 +654,6 @@ ul.outline span.theDateLine {
   margin: 10px 0 0 -30px;
   display: inline-block;
   font-size: 11px;
-  z-index: -1;
 }
 ul.outline div.codeBlock {
   color: #000;

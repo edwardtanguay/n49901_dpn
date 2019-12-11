@@ -349,3 +349,9 @@ exports.getMonthByMonthNumberGerman = function (monthNumberPerhapsInt) {
 	}
 	return 'UNKNOWN MONTH NUMBER: ' + monthNumber;
 }
+
+exports.addDaysToDate = function (date, daysToAdd) {
+	const dt = new Date(date);
+	dt.setDate(dt.getDate() + daysToAdd);
+	return dt.toISOString().split('T')[0];
+}
