@@ -70,8 +70,24 @@ Output Text;p
 - Special formatting also works: 	
 	- You can also tell users to press the [[Save]] button.
 	- Here is how you <H|highlight text|H> if you need to.
+	- And this is an example of lowlighting, i.e. secondary info text that you see is there but have to look closer to read it
+		- \`index.html\` <L|- the file that the browser loads first|L>
+		- \`main.js\` <L|- the file that contains all the JavaScript code|L>
+		- \`css.js\` <L|- the file that contains the stylesheet formatting|L>
 	- And you can also embed videos by simply adding the YouTube code at the end of the line, like this:@@J0Aq44Pze-w
 	- and you can use as many levels of outline as you need
+- Here are some parsing possibilities if you use the outline to e.g. **keep track of tasks you are working on**:
+	- This shows that you have something to do:
+		- )) create another text report
+		- )) convert all **jpg** files to **png**
+	- This shows that you are working on something:
+		- .. finishing the index.html page
+	- And this shows that you are waiting on something:
+		- ,, waiting for new specifications to be prepared
+	- Of course the far-reaching idea here is that you can parse all items for these codes and collect all items you are currently working on, waiting on and doing, e.g. to list on one overview page.
+- MORE_INFORMATION
+- Here you can see that any text you write on the first level that is in **all caps** and has **spaces at underlines**, will be parsed as a header.
+	- Note that the line after it has to be on the first level again.
 `;
 		this.sendResponse();
 	}

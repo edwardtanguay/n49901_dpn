@@ -824,6 +824,34 @@ span.standardOutlineButton {
 .outlineHighlight {
   background-color: #ffffd0;
 }
+.outlineLowlight {
+  color: #ccc;
+  font-style: italic;
+  font-size: 13px;
+}
 .outlineHighlight code {
   background-color: #ffffd0 !important;
+}
+.outlineWaitIcon {
+  font-size: 13px;
+}
+.outlineWaitLine {
+  color: brown;
+  background-color: #ddd;
+}
+.outlineDoingIcon {
+  font-size: 15px;
+  line-height: 3px;
+}
+.outlineDoingLine {
+  color: green;
+  background-color: #ddd;
+}
+.outlineTodoIcon {
+  font-size: 15px;
+  line-height: 3px;
+}
+.outlineTodoLine {
+  color: green;
+  background-color: #ddd;
 }

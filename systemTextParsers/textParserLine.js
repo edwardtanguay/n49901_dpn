@@ -95,6 +95,11 @@ class TextParserLine {
 			}
 		}
 
+		// headlines in format: MORE_INFORMATION
+		if (qstr.regexCheck(this.content, `^[A-Z_]*$`)) {
+			this.html = `<span class="theDateLine">${qstr.replaceAll(this.content, '_', ' ')}</class>`;
+		}
+
 		this.postHtml += '</li>';
 
 		if (this.lineNumber == this.totalNumberOfLines) {
@@ -201,6 +206,20 @@ class TextParserLine {
 
 		// call all other parsing in separate methods here
 		r = this.parseTextToHighlight(r);
+		r = this.parseTextToLowlight(r);
+
+		let waitMarker = ',,';
+		if (qstr.startsWith(r, waitMarker)) {
+			r = `<span class="outlineWaitLine">&nbsp;<i class="fa fa-hourglass-end outlineWaitIcon"></i> ${qstr.chopLeft(r, waitMarker)}&nbsp;</span>`;
+		}
+		let doingMarker = '..';
+		if (qstr.startsWith(r, doingMarker)) {
+			r = `<span class="outlineDoingLine">&nbsp;<i class="fa fa-cog fa-spin outlineDoingIcon"></i> ${qstr.chopLeft(r, doingMarker)}&nbsp;</span>`;
+		}
+		let todoMarker = '))';
+		if (qstr.startsWith(r, todoMarker)) {
+			r = `<span class="outlineDoingLine">&nbsp;<i class="fa fa-hand-o-right outlineTodoIcon"></i> ${qstr.chopLeft(r, todoMarker)}&nbsp;</span>`;
+		}
 
 		return r;
 	}
@@ -209,6 +228,13 @@ class TextParserLine {
 	parseTextToHighlight(r) {
 		r = qstr.replaceAll(r, `&lt;H|`, '<span class="outlineHighlight">');
 		r = qstr.replaceAll(r, `|H&gt;`, '</span>');
+		return r;
+	}
+
+	// <L|This is lowlighted text.|L> i.e. text that should be seen only if you look closer at it, e.g. greyed out
+	parseTextToLowlight(r) {
+		r = qstr.replaceAll(r, `&lt;L|`, '<span class="outlineLowlight">');
+		r = qstr.replaceAll(r, `|L&gt;`, '</span>');
 		return r;
 	}
 
