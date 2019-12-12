@@ -838,6 +838,8 @@ span.standardOutlineButton {
 .outlineWaitLine {
   color: brown;
   background-color: #ddd;
+  margin-top: 5px;
+  display: inline-block;
 }
 .outlineDoingIcon {
   font-size: 15px;
@@ -846,6 +848,8 @@ span.standardOutlineButton {
 .outlineDoingLine {
   color: green;
   background-color: #ddd;
+  margin-top: 5px;
+  display: inline-block;
 }
 .outlineTodoIcon {
   font-size: 15px;
@@ -854,4 +858,6 @@ span.standardOutlineButton {
 .outlineTodoLine {
   color: green;
   background-color: #ddd;
+  margin-top: 5px;
+  display: inline-block;
 }
