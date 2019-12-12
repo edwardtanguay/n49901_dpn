@@ -17,10 +17,14 @@
 	<style>
 		.developerPanel {
 			background-color: #eee;
-			border-top: 1px solid #ccc;
-			border-bottom: 1px solid #ccc;
+			border-top: 1px solid #28a745;
+			border-bottom: 1px solid #28a745;
 			font-family: 'Courier New', Courier, monospace;
 			color: navy;
+
+			-webkit-box-shadow: 0px 9px 17px -2px rgba(0, 0, 0, 0.31);
+			-moz-box-shadow: 0px 9px 17px -2px rgba(0, 0, 0, 0.31);
+			box-shadow: 0px 9px 17px -2px rgba(0, 0, 0, 0.31);
 		}
 
 		.developerPanelLink {
@@ -29,6 +33,15 @@
 			font-family: 'Courier New', Courier, monospace;
 			display: inline-block;
 			margin-top: 2px;
+		}
+
+		.developerPanelLink:hover {
+			color: green !important;
+		}
+
+		.developerPanelLinkSelected {
+			color: green !important;
+			font-weight: bold;
 		}
 
 		.developerPanelWait {
@@ -224,124 +237,14 @@
 						</li>
 						<%}%>
 
-                    <%
-                    // (((DROPDOWN))) --- not showing anymore, delete
-                    %>
-						<% if(false && data.system_userIsDeveloper && data.system_totalNumberOfDeveloperPages > 0) {%>
-						<li class="nav-item dropdown">
-							<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-								data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">DEVELOPER</a>
-							<div class="dropdown-menu" aria-labelledby="navbarDropdown">
-
-
-								<%
-                            // =============== DEVELOPER CUSTOM MANAGE
-                            %>
-								<% data.system_developerCustomManageMenuPageItems.forEach(function(item, index) { %>
-								<%if (item.idCode == data.system_currentPageItem.idCode) { %>
-								<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
-									<%= item.title %></a>
-								<% } else { %>
-								<a class="dropdown-item" href="<%= item.idCode %>">
-									<!--displayOrder-->
-									<%= item.title %> <span style="display:none; font-size: 11px; color: #ccc">
-										<%= item.displayOrder %></span></a>
-								<% } %>
-								<% }); %>
-								<% if(data.system_developerCustomManageMenuPageItems.length > 0) { %>
-								<div class="dropdown-divider"></div>
-								<% } %>
-
-								<%
-                            // =============== DEVELOPER MAIN
-                            %>
-								<% data.system_developerMainMenuPageItems.forEach(function(item, index) { %>
-								<%if (item.idCode == data.system_currentPageItem.idCode) { %>
-								<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
-									<%= item.title %></a>
-								<% } else { %>
-								<a class="dropdown-item" href="<%= item.idCode %>">
-									<!--displayOrder-->
-									<%= item.title %> <span style="display:none; font-size: 11px; color: #ccc">
-										<%= item.displayOrder %></span></a>
-								<% } %>
-								<% }); %>
-								<% if(data.system_developerMainMenuPageItems.length > 0) { %>
-								<div class="dropdown-divider"></div>
-								<% } %>
-
-								<%
-                            // =============== DEVELOPER SYSTEM MANAGE
-                            %>
-								<% data.system_developerSystemManageMenuPageItems.forEach(function(item, index) { %>
-								<%if (item.idCode == data.system_currentPageItem.idCode) { %>
-								<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
-									<%= item.title %></a>
-								<% } else { %>
-								<a class="dropdown-item" href="<%= item.idCode %>">
-									<%= item.title %></a>
-								<% } %>
-								<% }); %>
-								<% if(data.system_developerSystemManageMenuPageItems.length > 0) { %>
-								<div class="dropdown-divider"></div>
-								<% } %>
-
-								<%
-                            // =============== DEVELOPER SHOWCASES
-                            %>
-								<% data.system_developerShowcaseMenuPageItems.forEach(function(item, index) { %>
-								<%if (item.idCode == data.system_currentPageItem.idCode) { %>
-								<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
-									<%= item.title %></a>
-								<% } else { %>
-								<a class="dropdown-item" href="<%= item.idCode %>">
-									<%= item.title %></a>
-								<% } %>
-								<% }); %>
-								<% if(data.system_developerShowcaseMenuPageItems.length > 0) { %>
-								<div class="dropdown-divider"></div>
-								<% } %>
-
-								<%
-                            // =============== DEVELOPER SELDOM
-                            %>
-								<% data.system_developerSeldomMenuPageItems.forEach(function(item, index) { %>
-								<%if (item.idCode == data.system_currentPageItem.idCode) { %>
-								<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
-									<%= item.title %></a>
-								<% } else { %>
-								<a class="dropdown-item" href="<%= item.idCode %>">
-									<%= item.title %></a>
-								<% } %>
-								<% }); %>
-								<% if(data.system_developerSeldomMenuPageItems.length > 0) { %>
-								<div class="dropdown-divider"></div>
-								<% } %>
-
-
-								<%
-                            // =============== LOGIN/LOGOUT
-                            %>
-								<% data.system_loginAreaMenuPageItems.forEach(function(item, index) { %>
-								<%if (item.idCode == data.system_currentPageItem.idCode) { %>
-								<a class="dropdown-item pageSelected" href="<%= item.idCode %>">
-									<%= item.title %></a>
-								<% } else { %>
-								<a class="dropdown-item" href="<%= item.idCode %>">
-									<%= item.title %></a>
-								<% } %>
-								<% }); %>
-							</div>
-						</li>
-						<%}%>
-
 					<%
 					// DEVELOPER PANEL LINK
 					
 						%><% if(data.system_userIsDeveloper && data.system_totalNumberOfDeveloperPages > 0) {%>
 						<li class="nav-item active">
 							<a class="nav-link developerPanelLink prohibitSelectionClickable"
-								@click="toggleDeveloperPanel">DEVELOPER</a>
+								:class="[developerPanelStatus == 'hide' ? 'developerPanelLink' : 'developerPanelLinkSelected']"
+								@click="toggleDeveloperPanel()">DEVELOPER</a>
 						</li>
 						<%}%>
 
@@ -488,12 +391,6 @@
 				methods: {
 					toggleDeveloperPanel: function () {
 						this.developerPanelStatus = this.developerPanelStatus == 'hide' ? 'show' : 'hide';
-						// $(".developerPanel").fadeIn(100);
-						// if (this.developerPanelStatus == "show") {
-						// 	this.loadPanelData();
-						// } else {
-						// 	$(".developerPanel").fadeOut(100);
-						// }
 					},
 					initialize: function () {
 						this.loadPanelData();
