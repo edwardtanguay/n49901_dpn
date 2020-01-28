@@ -201,7 +201,7 @@ exports.getShortTimeFromDateTime = function (dateTime) {
 
 exports.getDayOfWeekNumber = function (dateTime) {
 	const d = new Date(dateTime);
-	return d.getDay();
+	return d.getUTCDay();
 }
 
 exports.getShortMonthWithWeekDay = function (dateTime, options = { fullWeekDay: false }) {
