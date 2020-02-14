@@ -71,10 +71,10 @@ exports.getJsonFromDataFile = function (fullOrRelativePathAndFileName, pathKind 
     let xml = '';
     switch (pathKind) {
         case 'relative':
-            xml = qfil.getContentOfDataFile(fullOrRelativePathAndFileName)
+            xml = qfil.getContentOfDataFile(fullOrRelativePathAndFileName);
             break;
         case 'full':
-            xml = qfil.getContentOfDataFileWithFullPathAndFileName(fullOrRelativePathAndFileName)
+            xml = qfil.getContentOfDataFileWithFullPathAndFileName(fullOrRelativePathAndFileName);
             break;
         default:
             qdev.debug('error', `bad pathKind "${pathKind}"`);
