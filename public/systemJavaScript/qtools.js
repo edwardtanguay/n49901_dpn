@@ -437,6 +437,50 @@ qarr.multisort = function (arr, columns, order_by) {
 	});
 }
 
+
+/* qarr */
+var qdat = qdat || {};
+
+qdat.getCurrentDateTime = function() {
+	return qdat.getTimeLine('standard');
+}
+
+// rawTimeString = "2017-08-01T08:18:32.525Z"
+qdat.getTimeLine = function (format) {
+	var offset = 2;
+
+	var d = new Date();
+	utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+	nd = new Date(utc + (3600000 * offset));
+	var rawTimeString = nd.toISOString();
+
+	var date = rawTimeString.substring(0, 10); // "2017-08-01"
+	var fullTime = rawTimeString.substring(11, 19); // "08:18:32"
+	var shortTime = rawTimeString.substring(11, 16); // "08:18"
+	var shortRoundedTime = rawTimeString.substring(11, 14) + "00"; // "08:00"
+	var shortRoundedTimeHalf = shortRoundedTime.substring(0, 3) + "30"; // "08:30"
+	var timeLine = '';
+
+	switch (format) {
+		case 'standard': // "2019-08-01 08:30:46"
+			timeLine = date + " " + fullTime;
+			break;
+		case 'range': // "2017-08-01 08:33 - 2017-08-01 08:33"
+			var shortTimeStamp = date + " " + shortTime;
+			timeLine = shortTimeStamp + ' - ' + shortTimeStamp;
+			break;
+		case 'roundedRange': // "2017-08-01 08:00 - 2017-08-01 08:00"
+			var shortRoundedTimeStamp1 = date + " " + shortRoundedTime;
+			var shortRoundedTimeStamp2 = date + " " + shortRoundedTimeHalf;
+			timeLine = shortRoundedTimeStamp1 + ' - ' + shortRoundedTimeStamp2;
+			break;
+		default:
+			timeLine = '(unknown format)';
+			break;
+	}
+	return timeLine;
+}
+
 // extensions:
 
 $.fn.selectRange = function (start, end) {
