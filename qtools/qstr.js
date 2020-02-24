@@ -981,3 +981,25 @@ exports.getNumberOfWordsInLine = function (line) {
 	const matches = line.match(/[\w\d\’\'-]+/gi);
 	return matches ? matches.length : 0;
 }
+
+exports.getTextBeforeMarker = function (line, marker) {
+	if (line.length > 0) {
+		const parts = qstr.breakIntoParts(line, marker);
+		return parts[0];
+	} else {
+		return '';
+	}
+}
+
+exports.getTextAfterMarker = function (line, marker) {
+	if (line.length > 0) {
+		const parts = qstr.breakIntoParts(line, marker);
+		if (parts.length > 1) {
+			return parts[1];
+		} else {
+			return '';
+		}
+	} else {
+		return '';
+	}
+}
