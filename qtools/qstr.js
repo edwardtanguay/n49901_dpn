@@ -976,3 +976,8 @@ exports.forceAsInteger = function (string) {
 exports.forceAsDecimal = function (string) {
 	return parseFloat(string);
 }
+
+exports.getNumberOfWordsInLine = function (line) {
+	const matches = line.match(/[\w\d\’\'-]+/gi);
+	return matches ? matches.length : 0;
+}
