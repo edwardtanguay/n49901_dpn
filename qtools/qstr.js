@@ -1003,3 +1003,16 @@ exports.getTextAfterMarker = function (line, marker) {
 		return '';
 	}
 }
+
+exports.getLastPart = function (main, delimiter) {
+	const parts = qstr.breakIntoParts(main, delimiter);
+	return qstr.getLastItemInArray(parts);
+}
+
+exports.getLastItemInArray = function (parts) {
+	if (parts.length != 0) {
+		return parts[parts.length - 1];
+	} else {
+		return '';
+	}
+}

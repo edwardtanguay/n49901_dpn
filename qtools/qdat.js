@@ -204,6 +204,7 @@ exports.getDayOfWeekNumber = function (dateTime) {
 	return d.getUTCDay();
 }
 
+// Wed, Apr 15
 exports.getShortMonthWithWeekDay = function (dateTime, options = { fullWeekDay: false }) {
 	const weekDayNumber = qdat.getDayOfWeekNumber(dateTime);
 
