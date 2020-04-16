@@ -355,3 +355,18 @@ exports.addDaysToDate = function (date, daysToAdd) {
 	dt.setDate(dt.getDate() + daysToAdd);
 	return dt.toISOString().split('T')[0];
 }
+
+exports.getMonthNumberFromYearMonth = function (yearMonth) {
+	return yearMonth.substr(5, 2);
+}
+exports.getYearFromYearMonth = function (yearMonth) {
+	return yearMonth.substr(0, 4);
+}
+
+// "2020-03" to "March 2020"
+exports.convertYearMonthToNiceYearMonth = function (yearMonth) {
+	const monthNumber = qstr.forceAsInteger(qdat.getMonthNumberFromYearMonth(yearMonth));
+	const year = qdat.getYearFromYearMonth(yearMonth);
+	const monthName = qdat.getMonthByMonthNumber(monthNumber);
+	return `${monthName} ${year}`;
+}
