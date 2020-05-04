@@ -185,6 +185,7 @@ class TextParserLine {
 			if (this.options.httpHighlightInCode) {
 				r = qstr.convertUrlsToLinkableUrls(r);
 			}
+			r = qstr.linkify(r);
 		} else {
 			r = qstr.parseMarkDown(r, {
 				suppressParagraphMarks: true, suppressOrderedListElements: true
